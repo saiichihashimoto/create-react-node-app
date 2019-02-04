@@ -28,7 +28,8 @@
     "@babel/preset-env": "7.3.1",
     "@babel/preset-react": "7.0.0",
     "cross-env": "5.2.0",
-    "nodemon": "1.18.9"
+    "nodemon": "1.18.9",
+    "universal-dotenv": "1.9.3"
   },
   "devDependencies": {
     "cz-conventional-changelog": "2.1.0",
