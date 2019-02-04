@@ -8,6 +8,7 @@ module.exports = {
 		`${src}/**/*.spec.js`,
 		`${src}/**/*.test.js`,
 		`${src}/**/*.web.js`,
+		`${src}/setupProxy.js`,
 		`${src}/setupTests.js`,
 	],
 	presets: [
@@ -17,6 +18,14 @@ module.exports = {
 				targets: {
 					node: 'current',
 				},
+				ignoreBrowserslistConfig: true,
+			},
+		],
+		[
+			'@babel/preset-react',
+			{
+				development: process.env.NODE_ENV === 'development',
+				useBuiltIns: true,
 			},
 		],
 	],
