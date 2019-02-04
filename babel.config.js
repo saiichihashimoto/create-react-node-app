@@ -29,4 +29,11 @@ module.exports = {
 			},
 		],
 	],
+	env: {
+		production: {
+			plugins: [
+				'transform-node-env-inline',
+			],
+		},
+	},
 };
