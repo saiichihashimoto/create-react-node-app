@@ -29,6 +29,14 @@ module.exports = {
 			},
 		],
 	],
+	plugins: [
+		[
+			'extension-resolver',
+			{
+				extensions: ['.server.js', '.server.jsx', '.server.es6', '.server.es', '.server.mjs', '.js', '.jsx', '.es6', '.es', '.mjs'],
+			},
+		],
+	],
 	env: {
 		production: {
 			plugins: [
