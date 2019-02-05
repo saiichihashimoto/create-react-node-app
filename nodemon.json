@@ -8,6 +8,8 @@
   "ignore": [
     "**/*.spec.js",
     "**/*.test.js",
-    "**/*.web.js"
+    "**/*.web.js",
+    "setupProxy.js",
+    "setupTests.js"
   ]
 }
