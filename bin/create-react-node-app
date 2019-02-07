@@ -1,11 +1,12 @@
-root=$(npm explore create-react-node-app -- pwd)
+#!/usr/bin/env bash
+set -e
+
+root=$(npm explore create-react-node-app -- pwd 2>/dev/null || echo .)
 
 if [ "$1" == "build" ]
 then
 	cross-env NODE_ENV=production babel src --out-dir lib --config-file=$root/babel.config.js --no-babelrc --source-maps --copy-files --delete-dir-on-start --verbose
-	exit $?
 elif [ "$1" == "start" ]
 then
 	nodemon --config $root/nodemon.json --exec babel-node src -- --config-file=$root/babel.config.js --no-babelrc --require $(npm explore universal-dotenv -- pwd)
-	exit $?
 fi

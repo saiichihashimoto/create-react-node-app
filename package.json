@@ -10,6 +10,11 @@
     "url": "git+https://github.com/saiichihashimoto/create-react-node-app.git"
   },
   "bin": "bin/create-react-node-app",
+  "scripts": {
+    "build": "./bin/create-react-node-app build",
+    "start": "./bin/create-react-node-app start",
+    "test": "npm run build"
+  },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
