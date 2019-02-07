@@ -22,8 +22,17 @@
       "path": "cz-conventional-changelog"
     }
   },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
   "eslintConfig": {
     "extends": "saiichihashimoto"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-saiichihashimoto"
   },
   "dependencies": {
     "@babel/cli": "7.2.3",
@@ -34,13 +43,23 @@
     "babel-plugin-extension-resolver": "github:GingerBear/babel-plugin-extension-resolver#03616d48fe9542a3e92bbb25c17c4f0437fe10cd",
     "babel-plugin-transform-node-env-inline": "0.4.3",
     "cross-env": "5.2.0",
+    "foreman": "3.0.1",
     "nodemon": "1.18.9",
+    "react-scripts": "2.1.3",
     "universal-dotenv": "1.9.3"
   },
   "devDependencies": {
     "cz-conventional-changelog": "2.1.0",
-    "eslint-config-saiichihashimoto": "1.0.2",
+    "eslint-config-saiichihashimoto": "1.0.3",
     "husky": "1.3.1",
-    "lint-my-app": "3.1.3"
-  }
+    "lint-my-app": "3.1.3",
+    "react": "16.8.1",
+    "react-dom": "16.8.1",
+    "stylelint-config-saiichihashimoto": "1.0.5"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "proxy": "http://localhost:3100"
 }

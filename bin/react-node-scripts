@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-root=$(npm explore create-react-node-app -- pwd 2>/dev/null || echo .)
+root=$(npm explore create-react-node-app -- pwd 2>/dev/null || pwd)
 
 if [ "$1" == "build" ]
 then
 	cross-env NODE_ENV=production babel src --out-dir lib --config-file=$root/babel.config.js --no-babelrc --source-maps --copy-files --delete-dir-on-start --verbose
+	cross-env SKIP_PREFLIGHT_CHECK=true react-scripts build
 elif [ "$1" == "start" ]
 then
-	nodemon --config $root/nodemon.json --exec babel-node src -- --config-file=$root/babel.config.js --no-babelrc --require $(npm explore universal-dotenv -- pwd)
+	cross-env PORT=${PORT:-3000} root=$root nf start --procfile $root/Procfile web=1,server=1
 fi
