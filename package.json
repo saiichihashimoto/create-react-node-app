@@ -9,10 +9,12 @@
     "type": "git",
     "url": "git+https://github.com/saiichihashimoto/create-react-node-app.git"
   },
-  "bin": "bin/create-react-node-app",
+  "bin": {
+    "react-node-scripts": "./bin/react-node-scripts"
+  },
   "scripts": {
-    "build": "./bin/create-react-node-app build",
-    "start": "./bin/create-react-node-app start",
+    "build": "./bin/react-node-scripts build",
+    "start": "./bin/react-node-scripts start",
     "test": "npm run build"
   },
   "config": {
