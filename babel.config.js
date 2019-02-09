@@ -36,12 +36,6 @@ module.exports = {
 				extensions: ['.server.js', '.server.jsx', '.server.es6', '.server.es', '.server.mjs', '.js', '.jsx', '.es6', '.es', '.mjs'],
 			},
 		],
+		'universal-dotenv',
 	],
-	env: {
-		production: {
-			plugins: [
-				'transform-node-env-inline',
-			],
-		},
-	},
 };
