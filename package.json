@@ -1,6 +1,11 @@
 {
   "name": "create-react-node-app",
   "version": "0.0.0-development",
+  "keywords": [
+    "create-react-app",
+    "node",
+    "react"
+  ],
   "homepage": "https://saiichihashimoto.github.io/create-react-node-app/",
   "bugs": {
     "url": "https://github.com/saiichihashimoto/create-react-node-app/issues"
@@ -9,6 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/saiichihashimoto/create-react-node-app.git"
   },
+  "license": "MIT",
   "bin": {
     "react-node-scripts": "./bin/react-node-scripts"
   },
