@@ -59,6 +59,7 @@
     "commander": "2.19.0",
     "cross-env": "5.2.0",
     "foreman": "3.0.1",
+    "mongodb-prebuilt": "6.5.0",
     "nodemon": "1.18.10",
     "react-scripts": "2.1.3"
   },
