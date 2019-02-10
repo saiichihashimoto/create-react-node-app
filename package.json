@@ -2,9 +2,11 @@
   "name": "create-react-node-app",
   "version": "0.0.0-development",
   "keywords": [
+    "build-tools",
     "create-react-app",
     "node",
-    "react"
+    "react",
+    "zero-configuration"
   ],
   "homepage": "https://saiichihashimoto.github.io/create-react-node-app/",
   "bugs": {
@@ -44,9 +46,14 @@
     "@babel/cli": "7.2.3",
     "@babel/core": "7.2.2",
     "@babel/node": "7.2.2",
+    "@babel/plugin-proposal-class-properties": "7.3.0",
     "@babel/preset-env": "7.3.1",
     "@babel/preset-react": "7.0.0",
+    "babel-plugin-css-modules-transform": "1.6.2",
     "babel-plugin-extension-resolver": "github:GingerBear/babel-plugin-extension-resolver#03616d48fe9542a3e92bbb25c17c4f0437fe10cd",
+    "babel-plugin-transform-assets": "1.0.2",
+    "babel-plugin-transform-dynamic-import": "2.1.0",
+    "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "babel-plugin-universal-dotenv": "1.1.0",
     "cross-env": "5.2.0",
     "foreman": "3.0.1",
