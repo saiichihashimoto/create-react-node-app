@@ -18,11 +18,12 @@
   },
   "license": "MIT",
   "bin": {
-    "react-node-scripts": "./bin/react-node-scripts"
+    "react-node-scripts": "./bin/react-node-scripts.js"
   },
   "scripts": {
-    "build": "./bin/react-node-scripts build",
-    "start": "./bin/react-node-scripts start",
+    "build": "./bin/react-node-scripts.js build",
+    "react-node-scripts": "./bin/react-node-scripts.js",
+    "start": "./bin/react-node-scripts.js start",
     "test": "npm run build"
   },
   "config": {
@@ -55,8 +56,10 @@
     "babel-plugin-transform-dynamic-import": "2.1.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "babel-plugin-universal-dotenv": "1.1.0",
+    "commander": "2.19.0",
     "cross-env": "5.2.0",
     "foreman": "3.0.1",
+    "mongodb-prebuilt": "6.5.0",
     "nodemon": "1.18.10",
     "react-scripts": "2.1.3"
   },
