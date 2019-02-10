@@ -26,12 +26,19 @@ module.exports = {
 		[
 			'@babel/preset-react',
 			{
-				development: process.env.NODE_ENV === 'development',
+				development: ['development', 'test'].includes(process.env.NODE_ENV),
 				useBuiltIns: true,
 			},
 		],
 	],
 	plugins: [
+		[
+			'@babel/plugin-proposal-class-properties',
+			{
+				loose: true,
+			},
+		],
+
 		[
 			'extension-resolver',
 			{
@@ -47,4 +54,16 @@ module.exports = {
 		],
 		'universal-dotenv',
 	],
+	env: {
+		production: {
+			plugins: [
+				[
+					'transform-react-remove-prop-types',
+					{
+						removeImport: true,
+					},
+				],
+			],
+		},
+	},
 };
