@@ -21,9 +21,9 @@
     "react-node-scripts": "./bin/react-node-scripts.js"
   },
   "scripts": {
-    "build": "./bin/react-node-scripts.js build",
+    "build": "npm run react-node-scripts -- build",
     "react-node-scripts": "./bin/react-node-scripts.js",
-    "start": "./bin/react-node-scripts.js start",
+    "start": "npm run react-node-scripts -- start",
     "test": "npm run build"
   },
   "config": {
@@ -58,7 +58,9 @@
     "babel-plugin-universal-dotenv": "1.1.0",
     "commander": "2.19.0",
     "cross-env": "5.2.0",
+    "execa": "1.0.0",
     "foreman": "3.0.1",
+    "listr": "0.14.3",
     "mongodb-prebuilt": "6.5.0",
     "nodemon": "1.18.10",
     "react-scripts": "2.1.4"

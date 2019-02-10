@@ -1,42 +1,77 @@
 #!/usr/bin/env node
+const Listr = require('listr');
+const execa = require('execa');
 const path = require('path');
 const program = require('commander');
-const spawnAsync = require('./spawnAsync');
 
 program
 	.option('--no-web')
 	.option('--no-server')
-	.action(({ web, server }) => Promise.resolve()
-		.then(() => server && spawnAsync(
-			require.resolve('@babel/cli/bin/babel'),
+	.action(
+		({ web, server }) => new Listr(
 			[
-				'src',
+				{
+					title: 'server',
+					skip:  () => !server,
+					task:  (output) => execa(
+						'babel',
+						[
+							'src',
 
-				'--out-dir', 'lib',
-				'--config-file', path.resolve(__dirname, 'babel.config.js'),
-				'--copy-files',
-				'--delete-dir-on-start',
-				'--no-babelrc',
-				'--source-maps',
-				'--verbose',
-			],
-			{
-				env: {
-					...process.env,
-					NODE_ENV: 'production',
+							'--out-dir', 'lib',
+							'--config-file', path.resolve(__dirname, 'babel.config.js'),
+							'--copy-files',
+							'--delete-dir-on-start',
+							'--no-babelrc',
+							'--source-maps',
+							'--verbose',
+						],
+						{
+							env: {
+								...process.env,
+								NODE_ENV: 'production',
+							},
+						},
+					)
+						.then((obj) => output.push(obj)),
 				},
-			},
-		))
-		.then(() => web && spawnAsync(
-			require.resolve('react-scripts/bin/react-scripts'),
-			[
-				'build',
-			],
-			{
-				env: {
-					...process.env,
-					SKIP_PREFLIGHT_CHECK: true,
+				{
+					title: 'web',
+					skip:  () => !web,
+					task:  (output) => execa(
+						'react-scripts',
+						[
+							'build',
+							'--color',
+						],
+						{
+							env: {
+								...process.env,
+								SKIP_PREFLIGHT_CHECK: true,
+							},
+						},
+					)
+						.then((obj) => output.push(obj)),
 				},
-			},
-		)))
+			],
+		)
+			.run([])
+			.then(
+				(output) => {
+					output
+						.filter(({ stdout }) => stdout)
+						.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
+				},
+				({ errors }) => {
+					errors
+						.filter(({ stdout }) => stdout)
+						.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
+					errors
+						.filter(({ stderr }) => stderr)
+						.forEach(({ stderr }) => console.error(stderr)); // eslint-disable-line no-console
+
+					process.exit(errors.find((err) => err.code) || 1);
+				},
+			),
+	)
 	.parse(process.argv);
