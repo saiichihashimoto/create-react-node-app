@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const execa = require('execa');
+import execa from 'execa';
 
 execa(
 	'react-scripts',

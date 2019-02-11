@@ -1,6 +1,11 @@
 language: node_js
 node_js:
   - 11
+script:
+  - npm test
+  - npm run test-build
+after_success:
+  - npx codecov
 jobs:
   include:
     - stage: release
@@ -9,4 +14,4 @@ jobs:
         provider: script
         skip_cleanup: true
         script:
-          - npx semantic-release
+          - npm run build && npx semantic-release

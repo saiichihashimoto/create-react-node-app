@@ -18,13 +18,15 @@
   },
   "license": "MIT",
   "files": [
-    "bin"
+    "lib"
   ],
   "bin": {
-    "react-node-scripts": "./bin/react-node-scripts.js"
+    "react-node-scripts": "./lib/react-node-scripts.js"
   },
   "scripts": {
-    "test": "cd test && npm install && npm run build && npm run test"
+    "build": "babel src --out-dir lib --source-maps --delete-dir-on-start --verbose --ignore \"**/*.spec.js\" && cp src/*.json lib && cp src/Procfile lib",
+    "test": "if [ -z \"$CI\" ]; then jest --watch; else jest --color --coverage; fi",
+    "test-build": "npm run build && cd test && npm ci && npm run build && npm run test"
   },
   "config": {
     "commitizen": {
@@ -42,6 +44,13 @@
   },
   "stylelint": {
     "extends": "stylelint-config-saiichihashimoto"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ]
   },
   "dependencies": {
     "@babel/cli": "7.2.3",
@@ -69,6 +78,7 @@
     "cz-conventional-changelog": "2.1.0",
     "eslint-config-saiichihashimoto": "1.0.7",
     "husky": "1.3.1",
+    "jest": "24.1.0",
     "lint-my-app": "3.2.2",
     "react": "16.8.1",
     "react-dom": "16.8.1",

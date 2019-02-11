@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-const Listr = require('listr');
-const execa = require('execa');
-const path = require('path');
-const program = require('commander');
+import Listr from 'listr';
+import execa from 'execa';
+import path from 'path';
+import program from 'commander';
 
 program
 	.option('--no-web')

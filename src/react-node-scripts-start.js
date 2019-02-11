@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-const execa = require('execa');
-const fs = require('fs');
-const path = require('path');
-const program = require('commander');
-const { existsSync } = require('fs');
-const { homedir } = require('os');
+import execa from 'execa';
+import path from 'path';
+import program from 'commander';
+import { existsSync } from 'fs';
+import { homedir } from 'os';
 
 program
 	.option('--mongod')
@@ -15,7 +14,7 @@ program
 			() => execa(
 				'node',
 				[
-					fs.existsSync('./lib/index.server.js') ? 'lib/index.server' : 'lib',
+					existsSync('./lib/index.server.js') ? 'lib/index.server' : 'lib',
 				],
 				{
 					stdio: [process.stdin, process.stdout, process.stderr],
@@ -47,7 +46,7 @@ program
 							MONGO_URL:            mongod && 'mongodb://localhost:27017/database',
 							SKIP_PREFLIGHT_CHECK: true,
 							...process.env,
-							src:                  fs.existsSync('./src/index.server.js') ? 'src/index.server' : 'src',
+							src:                  existsSync('./src/index.server.js') ? 'src/index.server' : 'src',
 							PORT:                 process.env.PORT || 3000,
 							NODE_ENV:             'development',
 							root:                 __dirname,

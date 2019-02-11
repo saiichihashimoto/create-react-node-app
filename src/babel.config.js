@@ -1,8 +1,8 @@
-const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent'); // eslint-disable-line import/no-extraneous-dependencies
+import getCSSModuleLocalIdent from 'react-dev-utils/getCSSModuleLocalIdent'; // eslint-disable-line import/no-extraneous-dependencies
 
 const src = `${process.cwd()}/src`;
 
-module.exports = {
+export default {
 	only: [
 		`${src}/**/*.js`,
 	],
