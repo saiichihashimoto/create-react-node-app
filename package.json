@@ -24,7 +24,7 @@
     "build": "npm run react-node-scripts -- build",
     "react-node-scripts": "./bin/react-node-scripts.js",
     "start": "npm run react-node-scripts -- start",
-    "test": "npm run build"
+    "test": "npm run react-node-scripts -- test"
   },
   "config": {
     "commitizen": {

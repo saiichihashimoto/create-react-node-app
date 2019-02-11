@@ -6,4 +6,5 @@ program
 	.version(version)
 	.command('build', 'builds the app')
 	.command('start', 'starts the app')
+	.command('test', 'tests using `react-scripts test`')
 	.parse(process.argv);
