@@ -56,22 +56,10 @@ program
 			],
 		)
 			.run([])
-			.then(
-				(output) => {
-					output
-						.filter(({ stdout }) => stdout)
-						.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-				},
-				({ errors }) => {
-					errors
-						.filter(({ stdout }) => stdout)
-						.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-					errors
-						.filter(({ stderr }) => stderr)
-						.forEach(({ stderr }) => console.error(stderr)); // eslint-disable-line no-console
-
-					process.exit(errors.find((err) => err.code) || 1);
-				},
-			),
+			.then((output) => {
+				output
+					.filter(({ stdout }) => stdout)
+					.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
+			}),
 	)
 	.parse(process.argv);

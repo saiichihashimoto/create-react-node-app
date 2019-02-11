@@ -1,0 +1,17 @@
+{
+  "name": "foo-bar",
+  "version": "0.0.0-development",
+  "dependencies": {
+    "install-local": "0.6.2"
+  },
+  "scripts": {
+    "postinstall": "install-local",
+    "build": "react-node-scripts build",
+    "start": "react-node-scripts start",
+    "test": "react-node-scripts test"
+  },
+  "localDependencies": {
+    "create-react-node-app": ".."
+  },
+  "proxy": "http://localhost:3100"
+}

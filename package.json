@@ -17,14 +17,14 @@
     "url": "git+https://github.com/saiichihashimoto/create-react-node-app.git"
   },
   "license": "MIT",
+  "files": [
+    "bin"
+  ],
   "bin": {
     "react-node-scripts": "./bin/react-node-scripts.js"
   },
   "scripts": {
-    "build": "npm run react-node-scripts -- build",
-    "react-node-scripts": "./bin/react-node-scripts.js",
-    "start": "npm run react-node-scripts -- start",
-    "test": "npm run react-node-scripts -- test"
+    "test": "cd test && npm install && npm run build && npm run test"
   },
   "config": {
     "commitizen": {
@@ -77,6 +77,5 @@
   "peerDependencies": {
     "react": "*",
     "react-dom": "*"
-  },
-  "proxy": "http://localhost:3100"
+  }
 }
