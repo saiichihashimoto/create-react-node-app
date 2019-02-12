@@ -7,7 +7,7 @@ jest.mock('child_process');
 
 const nodePath = process.argv[0];
 
-describe('lint-my-app', () => {
+describe('react-node-scripts', () => {
 	childProcess.spawn.mockImplementation(() => new EventEmitter());
 
 	beforeEach(() => {
