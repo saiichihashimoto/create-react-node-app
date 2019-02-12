@@ -1,3 +1,22 @@
-web:    react-scripts start --color
-server: nodemon --config $root/nodemon.json --exec babel-node $src -- --config-file=$root/babel.config.js --no-babelrc
-mongod: mkdir -p data/db && mongod --dbpath data/db --bind_ip 127.0.0.1
+# Order of Colors
+# https://github.com/strongloop/node-foreman/blob/master/lib/colors.js#L7
+
+# magenta
+# blue
+# cyan
+# green
+# yellow
+# red
+# bright_magenta
+# bright_cyan
+# bright_blue
+# bright_green
+# bright_yellow
+# bright_red
+
+web:     react-scripts start --color
+server:  nodemon --config $root/nodemon.json --exec babel-node $src -- --config-file=$root/babel.config.js --no-babelrc
+cyan:    echo cyan && tail -f /dev/null
+mongod:  mkdir -p data/db && mongod --dbpath data/db --bind_ip 127.0.0.1
+yellow:  echo yellow && tail -f /dev/null
+redis:   redis-server

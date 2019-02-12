@@ -43,7 +43,7 @@ describe('react-node-scripts start', () => {
 
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
-				['start', '--procfile', Procfile, 'web=1,server=1,mongod=0'],
+				['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
 				{ stdio, env },
 			);
 		});
@@ -52,7 +52,7 @@ describe('react-node-scripts start', () => {
 
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
-				['start', '--procfile', Procfile, 'web=0,server=1,mongod=0'],
+				['start', '--procfile', Procfile, 'web=0,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
 				{ stdio, env },
 			);
 		});
@@ -62,7 +62,7 @@ describe('react-node-scripts start', () => {
 
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
-				['start', '--procfile', Procfile, 'web=1,server=0,mongod=0'],
+				['start', '--procfile', Procfile, 'web=1,server=0,cyan=0,mongod=0,yellow=0,redis=0'],
 				{ stdio, env },
 			);
 		});
@@ -74,7 +74,7 @@ describe('react-node-scripts start', () => {
 
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
-				['start', '--procfile', Procfile, 'web=1,server=1,mongod=0'],
+				['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
 				{
 					stdio,
 					env: {
@@ -91,12 +91,14 @@ describe('react-node-scripts start', () => {
 
 				expect(execa).toHaveBeenCalledWith(
 					'nf',
-					['start', '--procfile', Procfile, 'web=1,server=1,mongod=1'],
+					['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=1,yellow=0,redis=0'],
 					{
 						stdio,
 						env: {
 							...env,
-							MONGO_URL: 'mongodb://localhost:27017/database',
+							MONGODB_URI: 'mongodb://localhost:27017/database',
+							MONGOHQ_URL: 'mongodb://localhost:27017/database',
+							ORMONGO_URL: 'mongodb://localhost:27017/database',
 						},
 					},
 				);
@@ -105,7 +107,7 @@ describe('react-node-scripts start', () => {
 			it('prebuilds mongod', async () => {
 				await start('--mongod');
 
-				expect(execa).toHaveBeenCalledWith('mongod', ['--version'], { stdio });
+				expect(execa).toHaveBeenCalledWith('mongod', ['--version']);
 			});
 
 			it('skips prebuilding mongod if exists', async () => {
@@ -113,7 +115,43 @@ describe('react-node-scripts start', () => {
 
 				await start('--mongod');
 
-				expect(execa).not.toHaveBeenCalledWith('mongod', ['--version'], { stdio });
+				expect(execa).not.toHaveBeenCalledWith('mongod', ['--version']);
+			});
+
+			it('throw on failed prebuild', async () => {
+				execa.mockImplementation((command) => {
+					if (command !== 'mongod') {
+						return Promise.resolve();
+					}
+					const err = new Error('Error Message');
+					err.code = 1;
+
+					throw err;
+				});
+
+				await expect(start('--mongod')).rejects.toThrow('Something went wrong');
+			});
+		});
+
+		describe('--redis', () => {
+			it('has redis=1', async () => {
+				await start('--redis');
+
+				expect(execa).toHaveBeenCalledWith(
+					'nf',
+					['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=1'],
+					{
+						stdio,
+						env: {
+							...env,
+							OPENREDIS_URL:  'redis://localhost:6379',
+							REDISCLOUD_URL: 'redis://localhost:6379',
+							REDISGREEN_URL: 'redis://localhost:6379',
+							REDISTOGO_URL:  'redis://localhost:6379',
+							REDIS_URL:      'redis://localhost:6379',
+						},
+					},
+				);
 			});
 		});
 
@@ -140,7 +178,7 @@ describe('react-node-scripts start', () => {
 
 				expect(execa).toHaveBeenCalledWith(
 					'nf',
-					['start', '--procfile', Procfile, 'web=1,server=1,mongod=0'],
+					['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
 					{
 						stdio,
 						env: {
