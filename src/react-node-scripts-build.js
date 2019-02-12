@@ -5,67 +5,66 @@ import path from 'path';
 import { Command } from 'commander';
 
 function build(args) {
-	let action = null;
-	new Command()
+	const command = new Command();
+
+	command
 		.option('--no-web')
 		.option('--no-server')
-		.action(
-			({ web, server }) => {
-				action = new Listr(
-					[
-						{
-							title: 'server',
-							skip:  () => !server,
-							task:  (output) => execa(
-								'babel',
-								[
-									'src',
+		.parse(args);
 
-									'--out-dir', 'lib',
-									'--config-file', path.resolve(__dirname, 'babel.config.js'),
-									'--copy-files',
-									'--delete-dir-on-start',
-									'--no-babelrc',
-									'--source-maps',
-									'--verbose',
-								],
-								{
-									env: {
-										...process.env,
-										NODE_ENV: 'production',
-									},
-								},
-							)
-								.then((obj) => output.push(obj)),
-						},
-						{
-							title: 'web',
-							skip:  () => !web,
-							task:  (output) => execa(
-								'react-scripts',
-								[
-									'build',
-									'--color',
-								],
-								{
-									env: {
-										...process.env,
-										SKIP_PREFLIGHT_CHECK: true,
-									},
-								},
-							)
-								.then((obj) => output.push(obj)),
-						},
+	const { web, server } = command;
+
+	return new Listr(
+		[
+			{
+				title: 'server',
+				skip:  () => !server,
+				task:  (output) => execa(
+					'babel',
+					[
+						'src',
+
+						'--out-dir', 'lib',
+						'--config-file', path.resolve(__dirname, 'babel.config.js'),
+						'--copy-files',
+						'--delete-dir-on-start',
+						'--no-babelrc',
+						'--source-maps',
+						'--verbose',
 					],
 					{
-						renderer: process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
+						env: {
+							...process.env,
+							NODE_ENV: 'production',
+						},
 					},
 				)
-					.run([]);
+					.then((obj) => output.push(obj)),
 			},
-		)
-		.parse(args);
-	return action;
+			{
+				title: 'web',
+				skip:  () => !web,
+				task:  (output) => execa(
+					'react-scripts',
+					[
+						'build',
+						'--color',
+					],
+					{
+						env: {
+							...process.env,
+							SKIP_PREFLIGHT_CHECK: true,
+						},
+					},
+				)
+					.then((obj) => output.push(obj)),
+			},
+		],
+		{
+			renderer: process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
+		},
+	)
+		.run([]);
 }
 
 /* istanbul ignore next line */
