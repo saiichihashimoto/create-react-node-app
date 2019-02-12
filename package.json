@@ -26,7 +26,7 @@
   "scripts": {
     "build": "babel src --out-dir lib --source-maps --delete-dir-on-start --verbose --ignore \"**/*.spec.js\" && cp src/*.json lib && cp src/Procfile lib",
     "test": "jest $(if [ -z \"$CI\" ]; then echo --watch; else echo --color --coverage; fi)",
-    "test-build": "npm run build && cd test && npm ci && npm run build && npm run test"
+    "test-build": "cd test && npm ci && npm run build && npm run test"
   },
   "config": {
     "commitizen": {
@@ -77,7 +77,9 @@
     "foreman": "3.0.1",
     "listr": "0.14.3",
     "mongodb-prebuilt": "6.5.0",
+    "ngrok": "3.1.1",
     "nodemon": "1.18.10",
+    "opn": "5.4.0",
     "react-scripts": "2.1.5"
   },
   "devDependencies": {

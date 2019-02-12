@@ -5,8 +5,9 @@
     "install-local": "0.6.2"
   },
   "scripts": {
-    "postinstall": "install-local",
     "build": "react-node-scripts build",
+    "postinstall": "npm run install-parent",
+    "install-parent": "cd .. && npm run build && cd test && install-local",
     "start": "react-node-scripts start",
     "test": "react-node-scripts test"
   },

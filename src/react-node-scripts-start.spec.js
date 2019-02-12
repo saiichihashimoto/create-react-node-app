@@ -1,11 +1,16 @@
 import execa from 'execa';
 import fs from 'fs';
+import ngrok from 'ngrok';
+import opn from 'opn';
 import path from 'path';
 import { homedir } from 'os';
 import start from './react-node-scripts-start';
 
 jest.mock('execa');
 jest.mock('fs');
+jest.mock('ngrok');
+jest.mock('opn');
+jest.useFakeTimers();
 
 describe('react-node-scripts start', () => {
 	let files = {};
@@ -34,12 +39,12 @@ describe('react-node-scripts start', () => {
 			],
 			{
 				env: {
-					SKIP_PREFLIGHT_CHECK: true,
 					...process.env,
-					src:                  'src',
-					PORT:                 3000,
 					NODE_ENV:             'development',
+					PORT:                 3000,
+					SKIP_PREFLIGHT_CHECK: true,
 					root:                 __dirname,
+					src:                  'src',
 				},
 				stdio: [process.stdin, process.stdout, process.stderr],
 			},
@@ -59,12 +64,12 @@ describe('react-node-scripts start', () => {
 			],
 			{
 				env: {
-					SKIP_PREFLIGHT_CHECK: true,
 					...process.env,
-					src:                  'src',
-					PORT:                 3000,
 					NODE_ENV:             'development',
+					PORT:                 3000,
+					SKIP_PREFLIGHT_CHECK: true,
 					root:                 __dirname,
+					src:                  'src',
 				},
 				stdio: [process.stdin, process.stdout, process.stderr],
 			},
@@ -84,12 +89,12 @@ describe('react-node-scripts start', () => {
 			],
 			{
 				env: {
-					SKIP_PREFLIGHT_CHECK: true,
 					...process.env,
-					src:                  'src',
-					PORT:                 3000,
 					NODE_ENV:             'development',
+					PORT:                 3000,
+					SKIP_PREFLIGHT_CHECK: true,
 					root:                 __dirname,
+					src:                  'src',
 				},
 				stdio: [process.stdin, process.stdout, process.stderr],
 			},
@@ -111,12 +116,12 @@ describe('react-node-scripts start', () => {
 			],
 			{
 				env: {
-					SKIP_PREFLIGHT_CHECK: true,
 					...process.env,
-					src:                  'src',
-					PORT:                 '5000',
 					NODE_ENV:             'development',
+					PORT:                 '5000',
+					SKIP_PREFLIGHT_CHECK: true,
 					root:                 __dirname,
+					src:                  'src',
 				},
 				stdio: [process.stdin, process.stdout, process.stderr],
 			},
@@ -140,104 +145,154 @@ describe('react-node-scripts start', () => {
 			],
 			{
 				env: {
-					SKIP_PREFLIGHT_CHECK: true,
 					...process.env,
+					NODE_ENV:             'development',
+					PORT:                 3000,
+					SKIP_PREFLIGHT_CHECK: true,
+					root:                 __dirname,
 					src:                  'src/index.server',
-					PORT:                 3000,
-					NODE_ENV:             'development',
-					root:                 __dirname,
 				},
 				stdio: [process.stdin, process.stdout, process.stderr],
 			},
 		);
 	});
 
-	it('runs mongod on --mongod', async () => {
-		await start('--mongod');
+	describe('NODE_ENV=production', () => {
+		it('runs `node lib`', async () => {
+			process.env.NODE_ENV = 'production';
 
-		expect(execa).toHaveBeenCalledWith(
-			'mongod',
-			[
-				'--version',
-			],
-			{
-				stdio: [process.stdin, process.stdout, process.stderr],
-			},
-		);
+			await start();
 
-		expect(execa).toHaveBeenCalledWith(
-			'nf',
-			[
-				'start',
-
-				'--procfile', path.resolve(__dirname, 'Procfile'),
-				'web=1,server=1,mongod=1',
-			],
-			{
-				env: {
-					MONGO_URL:            'mongodb://localhost:27017/database',
-					SKIP_PREFLIGHT_CHECK: true,
-					...process.env,
-					src:                  'src',
-					PORT:                 3000,
-					NODE_ENV:             'development',
-					root:                 __dirname,
+			expect(execa).toHaveBeenCalledWith(
+				'node',
+				[
+					'lib',
+				],
+				{
+					stdio: [process.stdin, process.stdout, process.stderr],
 				},
-				stdio: [process.stdin, process.stdout, process.stderr],
-			},
-		);
+			);
+
+			delete process.env.NODE_ENV;
+		});
+
+		it('runs `node lib/index.server`', async () => {
+			files = { './lib/index.server.js': true };
+			process.env.NODE_ENV = 'production';
+
+			await start();
+
+			expect(execa).toHaveBeenCalledWith(
+				'node',
+				[
+					'lib/index.server',
+				],
+				{
+					stdio: [process.stdin, process.stdout, process.stderr],
+				},
+			);
+
+			delete process.env.NODE_ENV;
+		});
 	});
 
-	it('doesn\'t rebuild over existing mongod', async () => {
-		files = { [path.resolve(homedir(), '.mongodb-prebuilt')]: true };
+	describe('--mongod', () => {
+		it('runs mongod', async () => {
+			await start('--mongod');
 
-		await start('--mongod');
+			expect(execa).toHaveBeenCalledWith(
+				'mongod',
+				[
+					'--version',
+				],
+				{
+					stdio: [process.stdin, process.stdout, process.stderr],
+				},
+			);
 
-		expect(execa).not.toHaveBeenCalledWith(
-			'mongod',
-			[
-				'--version',
-			],
-			{
-				stdio: [process.stdin, process.stdout, process.stderr],
-			},
-		);
+			expect(execa).toHaveBeenCalledWith(
+				'nf',
+				[
+					'start',
+
+					'--procfile', path.resolve(__dirname, 'Procfile'),
+					'web=1,server=1,mongod=1',
+				],
+				{
+					env: {
+						...process.env,
+						MONGO_URL:            'mongodb://localhost:27017/database',
+						NODE_ENV:             'development',
+						PORT:                 3000,
+						SKIP_PREFLIGHT_CHECK: true,
+						root:                 __dirname,
+						src:                  'src',
+					},
+					stdio: [process.stdin, process.stdout, process.stderr],
+				},
+			);
+		});
+
+		it('doesn\'t rebuild over existing mongod', async () => {
+			files = { [path.resolve(homedir(), '.mongodb-prebuilt')]: true };
+
+			await start('--mongod');
+
+			expect(execa).not.toHaveBeenCalledWith(
+				'mongod',
+				[
+					'--version',
+				],
+				{
+					stdio: [process.stdin, process.stdout, process.stderr],
+				},
+			);
+		});
 	});
 
-	it('run `node lib` on NODE_ENV=production', async () => {
-		process.env.NODE_ENV = 'production';
+	describe('--ngrok', () => {
+		ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
+		opn.mockImplementation(() => Promise.resolve());
+		setTimeout.mockImplementation((func) => func());
 
-		await start();
+		beforeEach(() => {
+			ngrok.connect.mockClear();
+			opn.mockClear();
+			setTimeout.mockClear();
+		});
 
-		expect(execa).toHaveBeenCalledWith(
-			'node',
-			[
-				'lib',
-			],
-			{
-				stdio: [process.stdin, process.stdout, process.stderr],
-			},
-		);
+		it('runs with BROWSER=none', async () => {
+			await start('--ngrok');
 
-		delete process.env.NODE_ENV;
-	});
+			expect(execa).toHaveBeenCalledWith(
+				'nf',
+				[
+					'start',
 
-	it('run `node lib/index.server` on NODE_ENV=production', async () => {
-		files = { './lib/index.server.js': true };
-		process.env.NODE_ENV = 'production';
+					'--procfile', path.resolve(__dirname, 'Procfile'),
+					'web=1,server=1,mongod=0',
+				],
+				{
+					env: {
+						...process.env,
+						BROWSER:                        'none',
+						DANGEROUSLY_DISABLE_HOST_CHECK: true,
+						NODE_ENV:                       'development',
+						PORT:                           3000,
+						SKIP_PREFLIGHT_CHECK:           true,
+						root:                           __dirname,
+						src:                            'src',
+					},
+					stdio: [process.stdin, process.stdout, process.stderr],
+				},
+			);
+		});
 
-		await start();
+		it('opens url in browser', async () => {
+			await start('--ngrok');
 
-		expect(execa).toHaveBeenCalledWith(
-			'node',
-			[
-				'lib/index.server',
-			],
-			{
-				stdio: [process.stdin, process.stdout, process.stderr],
-			},
-		);
-
-		delete process.env.NODE_ENV;
+			expect(ngrok.connect).toHaveBeenCalledWith({ port: 3000 });
+			expect(opn).toHaveBeenCalledWith('https://foo-bar.com');
+		});
 	});
 });

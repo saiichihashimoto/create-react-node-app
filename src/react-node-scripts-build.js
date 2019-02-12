@@ -2,11 +2,11 @@
 import Listr from 'listr';
 import execa from 'execa';
 import path from 'path';
-import program from 'commander';
+import { Command } from 'commander';
 
 function build(args) {
 	let action = null;
-	program
+	new Command()
 		.option('--no-web')
 		.option('--no-server')
 		.action(
