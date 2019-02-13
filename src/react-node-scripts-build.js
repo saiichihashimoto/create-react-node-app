@@ -69,13 +69,12 @@ function build(args) {
 
 /* istanbul ignore next line */
 if (require.main === module) {
-	build(process.argv).then(
-		(output) => {
+	build(process.argv)
+		.then((output) => (
 			output
 				.filter(({ stdout }) => stdout)
-				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-		},
-		({ code }) => process.exit(code || 1),
-	);
+				.forEach(({ stdout }) => console.log(stdout)) // eslint-disable-line no-console
+		))
+		.catch(({ code }) => process.exit(code || 1));
 }
 export default (...args) => build([process.argv[0], __filename, ...args]);
