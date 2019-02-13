@@ -1,22 +1,11 @@
-# Order of Colors
-# https://github.com/strongloop/node-foreman/blob/master/lib/colors.js#L7
+web:    cross-env PORT=`expr $PORT + $WEB_PORT_OFFSET` react-scripts start --color
+server: cross-env PORT=`expr $PORT + $SERVER_PORT_OFFSET` nodemon --config $root/nodemon.json --exec babel-node $src -- --config-file=$root/babel.config.js --no-babelrc
+mongod: mkdir -p data/db && mongod --dbpath data/db --bind_ip 127.0.0.1 --port $MONGOD_PORT
+redis:  redis-server --port $REDIS_PORT
 
-# magenta
-# blue
-# cyan
-# green
-# yellow
-# red
-# bright_magenta
-# bright_cyan
-# bright_blue
-# bright_green
-# bright_yellow
-# bright_red
-
-web:     react-scripts start --color
-server:  nodemon --config $root/nodemon.json --exec babel-node $src -- --config-file=$root/babel.config.js --no-babelrc
-cyan:    echo cyan && tail -f /dev/null
-mongod:  mkdir -p data/db && mongod --dbpath data/db --bind_ip 127.0.0.1
-yellow:  echo yellow && tail -f /dev/null
-redis:   redis-server
+# These should never happen
+foo1: echo foo1 && exit 1
+foo2: echo foo2 && exit 1
+foo3: echo foo3 && exit 1
+foo4: echo foo4 && exit 1
+foo5: echo foo5 && exit 1

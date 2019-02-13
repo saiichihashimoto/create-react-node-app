@@ -4,8 +4,10 @@ import ngrok from 'ngrok';
 import opn from 'opn';
 import path from 'path';
 import { homedir } from 'os';
+import execForeman from './execForeman';
 import start from './react-node-scripts-start';
 
+jest.mock('./execForeman');
 jest.mock('execa');
 jest.mock('fs');
 jest.mock('ngrok');
@@ -13,207 +15,200 @@ jest.mock('opn');
 jest.useFakeTimers();
 
 describe('react-node-scripts start', () => {
-	const stdio = [process.stdin, process.stdout, process.stderr];
-
 	let files = {};
+	let foremanArgs;
+
 	execa.mockImplementation(() => Promise.resolve());
+	execForeman.mockImplementation((args) => {
+		foremanArgs = args;
+
+		return Promise.resolve();
+	});
+
 	fs.existsSync.mockImplementation((filePath) => (
 		Object.prototype.hasOwnProperty.call(files, filePath)
 	));
 
 	afterEach(() => {
 		files = {};
+		foremanArgs = undefined;
+
 		execa.mockClear();
+		execForeman.mockClear();
 		fs.existsSync.mockClear();
 	});
 
-	describe('foreman', () => {
-		const Procfile = path.resolve(__dirname, 'Procfile');
-		const env = {
-			...process.env,
-			NODE_ENV:             'development',
-			PORT:                 3000,
-			SKIP_PREFLIGHT_CHECK: true,
-			root:                 __dirname,
-			src:                  'src',
-		};
-
-		it('executes', async () => {
-			await start();
-
-			expect(execa).toHaveBeenCalledWith(
-				'nf',
-				['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
-				{ stdio, env },
-			);
-		});
-		it('--no--web', async () => {
-			await start('--no-web');
-
-			expect(execa).toHaveBeenCalledWith(
-				'nf',
-				['start', '--procfile', Procfile, 'web=0,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
-				{ stdio, env },
-			);
-		});
-
-		it('--no--server', async () => {
-			await start('--no-server');
-
-			expect(execa).toHaveBeenCalledWith(
-				'nf',
-				['start', '--procfile', Procfile, 'web=1,server=0,cyan=0,mongod=0,yellow=0,redis=0'],
-				{ stdio, env },
-			);
-		});
-
-		it('src/index.server.js', async () => {
-			files = { './src/index.server.js': true };
-
-			await start();
-
-			expect(execa).toHaveBeenCalledWith(
-				'nf',
-				['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
-				{
-					stdio,
-					env: {
-						...env,
-						src: 'src/index.server',
-					},
-				},
-			);
-		});
-
-		describe('--mongod', () => {
-			it('has mongod=1', async () => {
-				await start('--mongod');
-
-				expect(execa).toHaveBeenCalledWith(
-					'nf',
-					['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=1,yellow=0,redis=0'],
-					{
-						stdio,
-						env: {
-							...env,
-							MONGODB_URI: 'mongodb://localhost:27017/database',
-							MONGOHQ_URL: 'mongodb://localhost:27017/database',
-							ORMONGO_URL: 'mongodb://localhost:27017/database',
-						},
-					},
-				);
-			});
-
-			it('prebuilds mongod', async () => {
-				await start('--mongod');
-
-				expect(execa).toHaveBeenCalledWith('mongod', ['--version']);
-			});
-
-			it('skips prebuilding mongod if exists', async () => {
-				files = { [path.resolve(homedir(), '.mongodb-prebuilt')]: true };
-
-				await start('--mongod');
-
-				expect(execa).not.toHaveBeenCalledWith('mongod', ['--version']);
-			});
-
-			it('throw on failed prebuild', async () => {
-				execa.mockImplementation((command) => {
-					if (command !== 'mongod') {
-						return Promise.resolve();
-					}
-					const err = new Error('Error Message');
-					err.code = 1;
-
-					throw err;
-				});
-
-				await expect(start('--mongod')).rejects.toThrow('Something went wrong');
-			});
-		});
-
-		describe('--redis', () => {
-			it('has redis=1', async () => {
-				await start('--redis');
-
-				expect(execa).toHaveBeenCalledWith(
-					'nf',
-					['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=1'],
-					{
-						stdio,
-						env: {
-							...env,
-							OPENREDIS_URL:  'redis://localhost:6379',
-							REDISCLOUD_URL: 'redis://localhost:6379',
-							REDISGREEN_URL: 'redis://localhost:6379',
-							REDISTOGO_URL:  'redis://localhost:6379',
-							REDIS_URL:      'redis://localhost:6379',
-						},
-					},
-				);
-			});
-		});
-
-		describe('--ngrok', () => {
-			ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
-			opn.mockImplementation(() => Promise.resolve());
-			setTimeout.mockImplementation((func) => func());
-
-			afterEach(() => {
-				ngrok.connect.mockClear();
-				opn.mockClear();
-				setTimeout.mockClear();
-			});
-
-			it('executes ngrok & opn', async () => {
-				await start('--ngrok');
-
-				expect(ngrok.connect).toHaveBeenCalledWith({ port: 3000 });
-				expect(opn).toHaveBeenCalledWith('https://foo-bar.com');
-			});
-
-			it('sets BROWSER=none', async () => {
-				await start('--ngrok');
-
-				expect(execa).toHaveBeenCalledWith(
-					'nf',
-					['start', '--procfile', Procfile, 'web=1,server=1,cyan=0,mongod=0,yellow=0,redis=0'],
-					{
-						stdio,
-						env: {
-							...env,
-							BROWSER:                        'none',
-							DANGEROUSLY_DISABLE_HOST_CHECK: true,
-						},
-					},
-				);
-			});
-		});
-	});
-
-	describe('NODE_ENV=production', () => {
+	describe('node', () => {
 		const NODE_ENV_BEFORE = process.env.NODE_ENV;
+		const stdio = [process.stdin, process.stdout, process.stderr];
 
-		beforeAll(() => {
-			process.env.NODE_ENV = 'production';
-		});
-
-		afterAll(() => {
+		afterEach(() => {
 			process.env.NODE_ENV = NODE_ENV_BEFORE;
 		});
 
-		it('executes `node lib`', async () => {
+		it('doesn\'t execute', async () => {
+			await start();
+
+			expect(execa).not.toHaveBeenCalledWith('node', ['lib'], { stdio });
+		});
+
+		it('executes with NODE_ENV=production', async () => {
+			process.env.NODE_ENV = 'production';
 			await start();
 
 			expect(execa).toHaveBeenCalledWith('node', ['lib'], { stdio });
 		});
 
-		it('lib/index.server.js', async () => {
+		it('uses lib/index.server.js', async () => {
+			process.env.NODE_ENV = 'production';
 			files = { './lib/index.server.js': true };
+
 			await start();
 
 			expect(execa).toHaveBeenCalledWith('node', ['lib/index.server'], { stdio });
+		});
+	});
+
+	describe('web', () => {
+		it('is passed to execForeman', async () => {
+			await start();
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.web).toBeTruthy();
+		});
+
+		it('is not passed with --no-web', async () => {
+			await start('--no-web');
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.web).toBeFalsy();
+		});
+	});
+
+	describe('server', () => {
+		it('is passed to execForeman', async () => {
+			await start();
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.server).toBeTruthy();
+		});
+
+		it('is not passed with --no-server', async () => {
+			await start('--no-server');
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.server).toBeFalsy();
+		});
+	});
+
+	describe('mongod', () => {
+		it('is not passed to execForeman', async () => {
+			await start();
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.mongod).toBeFalsy();
+		});
+
+		it('is passed with --mongod', async () => {
+			await start('--mongod');
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.mongod).toBeTruthy();
+		});
+
+		it('prebuilds mongod', async () => {
+			await start('--mongod');
+
+			expect(execa).toHaveBeenCalledWith('mongod', ['--version']);
+		});
+
+		it('skips prebuilding mongod if exists', async () => {
+			files = { [path.resolve(homedir(), '.mongodb-prebuilt')]: true };
+
+			await start('--mongod');
+
+			expect(execa).not.toHaveBeenCalledWith('mongod', ['--version']);
+		});
+
+		it('throw on failed prebuild', async () => {
+			execa.mockImplementation((command) => {
+				if (command !== 'mongod') {
+					return Promise.resolve();
+				}
+				const err = new Error('Error Message');
+				err.code = 1;
+
+				throw err;
+			});
+
+			await expect(start('--mongod')).rejects.toThrow('Something went wrong');
+		});
+	});
+
+	describe('redis', () => {
+		it('is not passed to execForeman', async () => {
+			await start();
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.redis).toBeFalsy();
+		});
+
+		it('is passed with --redis', async () => {
+			await start('--redis');
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.redis).toBeTruthy();
+		});
+
+		it.todo('prebuilds redis');
+
+		it.todo('skips prebuilding redis if exists');
+	});
+
+	describe('ngrok', () => {
+		ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
+		opn.mockImplementation(() => Promise.resolve());
+		setTimeout.mockImplementation((func) => func());
+
+		afterEach(() => {
+			ngrok.connect.mockClear();
+			opn.mockClear();
+			setTimeout.mockClear();
+		});
+
+		it('is not passed to execForeman', async () => {
+			await start();
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.ngrok).toBeFalsy();
+		});
+
+		it('is passed with --ngrok', async () => {
+			await start('--ngrok');
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.ngrok).toBeTruthy();
+		});
+
+		it('executes ngrok & opn', async () => {
+			await start('--ngrok');
+
+			expect(ngrok.connect).toHaveBeenCalledWith({ port: 3000 });
+			expect(opn).toHaveBeenCalledWith('https://foo-bar.com');
+		});
+
+		it('is not passed with --no-web', async () => {
+			await start('--ngrok', '--no-web');
+
+			expect(execForeman).toHaveBeenCalled();
+			expect(foremanArgs.ngrok).toBeFalsy();
+		});
+
+		it('doesn\'t execute ngrok & opn with --no-web', async () => {
+			await start('--ngrok', '--no-web');
+
+			expect(ngrok.connect).not.toHaveBeenCalledWith({ port: 3000 });
+			expect(opn).not.toHaveBeenCalledWith('https://foo-bar.com');
 		});
 	});
 });

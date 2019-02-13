@@ -1,1 +1,1 @@
-console.log('server!'); // eslint-disable-line no-console
+console.log('server!', process.env.PORT); // eslint-disable-line no-console
