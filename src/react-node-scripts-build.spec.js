@@ -5,10 +5,12 @@ import build from './react-node-scripts-build';
 jest.mock('execa');
 
 describe('react-node-scripts build', () => {
-	execa.mockImplementation(() => Promise.resolve());
+	beforeEach(() => {
+		execa.mockImplementation(() => Promise.resolve());
+	});
 
 	afterEach(() => {
-		execa.mockClear();
+		jest.resetAllMocks();
 	});
 
 	describe('babel', () => {

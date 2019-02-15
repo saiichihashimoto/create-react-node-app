@@ -4,10 +4,12 @@ import runTest from './react-node-scripts-test';
 jest.mock('execa');
 
 describe('react-node-scripts test', () => {
-	execa.mockImplementation(() => Promise.resolve());
+	beforeEach(() => {
+		execa.mockImplementation(() => Promise.resolve());
+	});
 
 	afterEach(() => {
-		execa.mockClear();
+		jest.resetAllMocks();
 	});
 
 	describe('react-scripts test', () => {
