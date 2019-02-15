@@ -4,14 +4,6 @@ import runTest from './react-node-scripts-test';
 jest.mock('execa');
 
 describe('react-node-scripts test', () => {
-	const options = {
-		env: {
-			...process.env,
-			SKIP_PREFLIGHT_CHECK: true,
-		},
-		stdio: [process.stdin, process.stdout, process.stderr],
-	};
-
 	execa.mockImplementation(() => Promise.resolve());
 
 	afterEach(() => {
@@ -22,13 +14,29 @@ describe('react-node-scripts test', () => {
 		it('executes', async () => {
 			await expect(runTest()).resolves;
 
-			expect(execa).toHaveBeenCalledWith('react-scripts', ['test', '--color'], options);
+			expect(execa).toHaveBeenCalledWith(
+				'react-scripts',
+				['test', '--color'],
+				expect.objectContaining({
+					env: expect.objectContaining({
+						SKIP_PREFLIGHT_CHECK: true,
+					}),
+				}),
+			);
 		});
 
 		it('consumes arguments', async () => {
 			await expect(runTest('arg1', 'arg2')).resolves;
 
-			expect(execa).toHaveBeenCalledWith('react-scripts', ['test', '--color', 'arg1', 'arg2'], options);
+			expect(execa).toHaveBeenCalledWith(
+				'react-scripts',
+				['test', '--color', 'arg1', 'arg2'],
+				expect.objectContaining({
+					env: expect.objectContaining({
+						SKIP_PREFLIGHT_CHECK: true,
+					}),
+				}),
+			);
 		});
 	});
 });

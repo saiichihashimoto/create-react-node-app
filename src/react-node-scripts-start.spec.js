@@ -16,22 +16,15 @@ jest.useFakeTimers();
 
 describe('react-node-scripts start', () => {
 	let files = {};
-	let foremanArgs;
 
 	execa.mockImplementation(() => Promise.resolve());
-	execForeman.mockImplementation((args) => {
-		foremanArgs = args;
-
-		return Promise.resolve();
-	});
-
+	execForeman.mockImplementation(() => Promise.resolve());
 	fs.existsSync.mockImplementation((filePath) => (
 		Object.prototype.hasOwnProperty.call(files, filePath)
 	));
 
 	afterEach(() => {
 		files = {};
-		foremanArgs = undefined;
 
 		execa.mockClear();
 		execForeman.mockClear();
@@ -40,7 +33,6 @@ describe('react-node-scripts start', () => {
 
 	describe('node', () => {
 		const NODE_ENV_BEFORE = process.env.NODE_ENV;
-		const stdio = [process.stdin, process.stdout, process.stderr];
 
 		afterEach(() => {
 			process.env.NODE_ENV = NODE_ENV_BEFORE;
@@ -49,14 +41,14 @@ describe('react-node-scripts start', () => {
 		it('doesn\'t execute', async () => {
 			await start();
 
-			expect(execa).not.toHaveBeenCalledWith('node', ['lib'], { stdio });
+			expect(execa).not.toHaveBeenCalledWith('node', ['lib'], expect.anything());
 		});
 
 		it('executes with NODE_ENV=production', async () => {
 			process.env.NODE_ENV = 'production';
 			await start();
 
-			expect(execa).toHaveBeenCalledWith('node', ['lib'], { stdio });
+			expect(execa).toHaveBeenCalledWith('node', ['lib'], expect.anything());
 		});
 
 		it('uses lib/index.server.js', async () => {
@@ -65,7 +57,7 @@ describe('react-node-scripts start', () => {
 
 			await start();
 
-			expect(execa).toHaveBeenCalledWith('node', ['lib/index.server'], { stdio });
+			expect(execa).toHaveBeenCalledWith('node', ['lib/index.server'], expect.anything());
 		});
 	});
 
@@ -73,15 +65,13 @@ describe('react-node-scripts start', () => {
 		it('is passed to execForeman', async () => {
 			await start();
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.web).toBeTruthy();
+			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ web: true }));
 		});
 
 		it('is not passed with --no-web', async () => {
 			await start('--no-web');
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.web).toBeFalsy();
+			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ web: true }));
 		});
 	});
 
@@ -89,15 +79,13 @@ describe('react-node-scripts start', () => {
 		it('is passed to execForeman', async () => {
 			await start();
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.server).toBeTruthy();
+			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ server: true }));
 		});
 
 		it('is not passed with --no-server', async () => {
 			await start('--no-server');
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.server).toBeFalsy();
+			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ server: true }));
 		});
 	});
 
@@ -105,15 +93,13 @@ describe('react-node-scripts start', () => {
 		it('is not passed to execForeman', async () => {
 			await start();
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.mongod).toBeFalsy();
+			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
 		});
 
 		it('is passed with --mongod', async () => {
 			await start('--mongod');
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.mongod).toBeTruthy();
+			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
 		});
 
 		it('prebuilds mongod', async () => {
@@ -149,15 +135,13 @@ describe('react-node-scripts start', () => {
 		it('is not passed to execForeman', async () => {
 			await start();
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.redis).toBeFalsy();
+			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
 		});
 
 		it('is passed with --redis', async () => {
 			await start('--redis');
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.redis).toBeTruthy();
+			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
 		});
 
 		it.todo('prebuilds redis');
@@ -179,35 +163,32 @@ describe('react-node-scripts start', () => {
 		it('is not passed to execForeman', async () => {
 			await start();
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.ngrok).toBeFalsy();
+			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
 		});
 
 		it('is passed with --ngrok', async () => {
 			await start('--ngrok');
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.ngrok).toBeTruthy();
+			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
 		});
 
 		it('executes ngrok & opn', async () => {
 			await start('--ngrok');
 
-			expect(ngrok.connect).toHaveBeenCalledWith({ port: 3000 });
+			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
 			expect(opn).toHaveBeenCalledWith('https://foo-bar.com');
 		});
 
 		it('is not passed with --no-web', async () => {
 			await start('--ngrok', '--no-web');
 
-			expect(execForeman).toHaveBeenCalled();
-			expect(foremanArgs.ngrok).toBeFalsy();
+			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
 		});
 
 		it('doesn\'t execute ngrok & opn with --no-web', async () => {
 			await start('--ngrok', '--no-web');
 
-			expect(ngrok.connect).not.toHaveBeenCalledWith({ port: 3000 });
+			expect(ngrok.connect).not.toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
 			expect(opn).not.toHaveBeenCalledWith('https://foo-bar.com');
 		});
 	});

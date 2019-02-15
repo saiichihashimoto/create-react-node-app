@@ -28,12 +28,11 @@ describe('react-node-scripts build', () => {
 					'--source-maps',
 					'--verbose',
 				],
-				{
-					env: {
-						...process.env,
+				expect.objectContaining({
+					env: expect.objectContaining({
 						NODE_ENV: 'production',
-					},
-				},
+					}),
+				}),
 			);
 		});
 
@@ -53,34 +52,42 @@ describe('react-node-scripts build', () => {
 					'--source-maps',
 					'--verbose',
 				],
-				{
-					env: {
-						...process.env,
+				expect.objectContaining({
+					env: expect.objectContaining({
 						NODE_ENV: 'production',
-					},
-				},
+					}),
+				}),
 			);
 		});
 	});
 
 	describe('react-scripts build', () => {
-		const options = {
-			env: {
-				...process.env,
-				SKIP_PREFLIGHT_CHECK: true,
-			},
-		};
-
 		it('executes', async () => {
 			await build();
 
-			expect(execa).toHaveBeenCalledWith('react-scripts', ['build', '--color'], options);
+			expect(execa).toHaveBeenCalledWith(
+				'react-scripts',
+				['build', '--color'],
+				expect.objectContaining({
+					env: expect.objectContaining({
+						SKIP_PREFLIGHT_CHECK: true,
+					}),
+				}),
+			);
 		});
 
 		it('--no-web', async () => {
 			await build('--no-web');
 
-			expect(execa).not.toHaveBeenCalledWith('react-scripts', ['build', '--color'], options);
+			expect(execa).not.toHaveBeenCalledWith(
+				'react-scripts',
+				['build', '--color'],
+				expect.objectContaining({
+					env: expect.objectContaining({
+						SKIP_PREFLIGHT_CHECK: true,
+					}),
+				}),
+			);
 		});
 	});
 });
