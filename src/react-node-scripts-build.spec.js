@@ -36,8 +36,8 @@ describe('react-node-scripts build', () => {
 			);
 		});
 
-		it('--no-server', async () => {
-			await build('--no-server');
+		it('an be disabled', async () => {
+			await build({ server: false });
 
 			expect(execa).not.toHaveBeenCalledWith(
 				'babel',
@@ -76,8 +76,8 @@ describe('react-node-scripts build', () => {
 			);
 		});
 
-		it('--no-web', async () => {
-			await build('--no-web');
+		it('can be disabled', async () => {
+			await build({ web: false });
 
 			expect(execa).not.toHaveBeenCalledWith(
 				'react-scripts',

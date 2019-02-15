@@ -68,8 +68,8 @@ describe('react-node-scripts start', () => {
 			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ web: true }));
 		});
 
-		it('is not passed with --no-web', async () => {
-			await start('--no-web');
+		it('can be disabled', async () => {
+			await start({ web: false });
 
 			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ web: true }));
 		});
@@ -82,8 +82,8 @@ describe('react-node-scripts start', () => {
 			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ server: true }));
 		});
 
-		it('is not passed with --no-server', async () => {
-			await start('--no-server');
+		it('can be disabled', async () => {
+			await start({ server: false });
 
 			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ server: true }));
 		});
@@ -96,14 +96,14 @@ describe('react-node-scripts start', () => {
 			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
 		});
 
-		it('is passed with --mongod', async () => {
-			await start('--mongod');
+		it('can be enabled', async () => {
+			await start({ mongod: true });
 
 			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
 		});
 
 		it('prebuilds mongod', async () => {
-			await start('--mongod');
+			await start({ mongod: true });
 
 			expect(execa).toHaveBeenCalledWith('mongod', ['--version']);
 		});
@@ -111,7 +111,7 @@ describe('react-node-scripts start', () => {
 		it('skips prebuilding mongod if exists', async () => {
 			files = { [path.resolve(homedir(), '.mongodb-prebuilt')]: true };
 
-			await start('--mongod');
+			await start({ mongod: true });
 
 			expect(execa).not.toHaveBeenCalledWith('mongod', ['--version']);
 		});
@@ -127,7 +127,7 @@ describe('react-node-scripts start', () => {
 				throw err;
 			});
 
-			await expect(start('--mongod')).rejects.toThrow('Something went wrong');
+			await expect(start({ mongod: true })).rejects.toThrow('Something went wrong');
 		});
 	});
 
@@ -138,8 +138,8 @@ describe('react-node-scripts start', () => {
 			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
 		});
 
-		it('is passed with --redis', async () => {
-			await start('--redis');
+		it('can be enabled', async () => {
+			await start({ redis: true });
 
 			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
 		});
@@ -166,27 +166,27 @@ describe('react-node-scripts start', () => {
 			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
 		});
 
-		it('is passed with --ngrok', async () => {
-			await start('--ngrok');
+		it('can be enabled', async () => {
+			await start({ ngrok: true });
 
 			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
 		});
 
 		it('executes ngrok & opn', async () => {
-			await start('--ngrok');
+			await start({ ngrok: true });
 
 			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
 			expect(opn).toHaveBeenCalledWith('https://foo-bar.com');
 		});
 
-		it('is not passed with --no-web', async () => {
-			await start('--ngrok', '--no-web');
+		it('can\'t be enabled if web is disabled', async () => {
+			await start({ ngrok: true, web: false });
 
 			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
 		});
 
 		it('doesn\'t execute ngrok & opn with --no-web', async () => {
-			await start('--ngrok', '--no-web');
+			await start({ ngrok: true, web: false });
 
 			expect(ngrok.connect).not.toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
 			expect(opn).not.toHaveBeenCalledWith('https://foo-bar.com');

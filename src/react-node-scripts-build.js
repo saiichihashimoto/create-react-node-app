@@ -2,18 +2,9 @@
 import Listr from 'listr';
 import execa from 'execa';
 import path from 'path';
-import { Command } from 'commander';
+import program from 'commander';
 
-function build(args) {
-	const command = new Command();
-
-	command
-		.option('--no-web')
-		.option('--no-server')
-		.parse(args);
-
-	const { web, server } = command;
-
+function build({ web = true, server = true } = {}) {
 	return new Listr(
 		[
 			{
@@ -69,12 +60,31 @@ function build(args) {
 
 /* istanbul ignore next line */
 if (require.main === module) {
-	build(process.argv)
-		.then((output) => (
+	program
+		.option('--no-web')
+		.option('--no-server')
+		.parse(process.argv);
+
+	build(process)
+		.then((output) => {
 			output
 				.filter(({ stdout }) => stdout)
-				.forEach(({ stdout }) => console.log(stdout)) // eslint-disable-line no-console
-		))
-		.catch(({ code }) => process.exit(code || 1));
+				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
+			return output;
+		})
+		.catch((err) => {
+			const { errors = [] } = err;
+
+			/* istanbul ignore next line */
+			errors
+				.filter(({ stdout }) => stdout)
+				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
+			/* istanbul ignore next line */
+			errors
+				.filter(({ stderr }) => stderr)
+				.forEach(({ stderr }) => console.error(stderr)); // eslint-disable-line no-console
+
+			process.exit(err.code || (errors.find(({ code }) => code) || {}).code || 1);
+		});
 }
-export default (...args) => build([process.argv[0], __filename, ...args]);
+export default build;

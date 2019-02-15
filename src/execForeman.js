@@ -2,8 +2,7 @@ import execa from 'execa';
 import path from 'path';
 import { existsSync } from 'fs';
 
-export default function execForeman(options = {}) {
-	const { web, server, mongod, redis, ngrok } = options;
+export default function execForeman({ web, server, mongod, redis, ngrok } = {}) {
 	const {
 		env: {
 			PORT = 3000,
