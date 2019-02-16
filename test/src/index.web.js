@@ -1,5 +1,6 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
 import './index.css';
-import logo from './logo.svg';
-import styles from './index.module.css';
 
-console.log('web!', styles.app, logo); // eslint-disable-line no-console
+ReactDOM.render(<App />, document.getElementById('root'));

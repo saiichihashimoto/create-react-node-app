@@ -1,15 +1,23 @@
 {
   "name": "foo-bar",
   "version": "0.0.0-development",
-  "dependencies": {
-    "install-local": "0.6.2"
-  },
   "scripts": {
     "build": "react-node-scripts build",
     "postinstall": "npm run install-parent",
     "install-parent": "cd .. && npm run build && cd test && install-local",
     "start": "react-node-scripts start",
     "test": "react-node-scripts test"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "dependencies": {
+    "install-local": "1.0.0",
+    "react": "^16.8.2",
+    "react-dom": "^16.8.2"
   },
   "localDependencies": {
     "create-react-node-app": ".."
