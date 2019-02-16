@@ -37,6 +37,11 @@ async function start(args = {}) {
 				enabled: () => mongod && !existsSync(path.resolve(homedir(), '.mongodb-prebuilt')),
 				task:    () => execa('mongod', ['--version']).stdout,
 			},
+			{
+				title:   'Downloading redis',
+				enabled: () => redis && !existsSync(path.resolve(homedir(), '.redis-prebuilt')),
+				task:    () => execa('redis-server', ['--version']).stdout,
+			},
 		],
 		{
 			renderer:    process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',

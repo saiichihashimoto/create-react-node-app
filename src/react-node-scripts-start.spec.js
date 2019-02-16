@@ -116,7 +116,7 @@ describe('react-node-scripts start', () => {
 			expect(execa).not.toHaveBeenCalledWith('mongod', ['--version']);
 		});
 
-		it('throw on failed prebuild', async () => {
+		it('throws on failed prebuild', async () => {
 			execa.mockImplementation((command) => {
 				if (command !== 'mongod') {
 					return Promise.resolve();
@@ -144,9 +144,33 @@ describe('react-node-scripts start', () => {
 			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
 		});
 
-		it.todo('prebuilds redis');
+		it('prebuilds redis', async () => {
+			await start({ redis: true });
 
-		it.todo('skips prebuilding redis if exists');
+			expect(execa).toHaveBeenCalledWith('redis-server', ['--version']);
+		});
+
+		it('skips prebuilding redis if exists', async () => {
+			files = { [path.resolve(homedir(), '.redis-prebuilt')]: true };
+
+			await start({ mongod: true });
+
+			expect(execa).not.toHaveBeenCalledWith('redis', ['--version']);
+		});
+
+		it('throws on failed prebuild', async () => {
+			execa.mockImplementation((command) => {
+				if (command !== 'redis-server') {
+					return Promise.resolve();
+				}
+				const err = new Error('Error Message');
+				err.code = 1;
+
+				throw err;
+			});
+
+			await expect(start({ redis: true })).rejects.toThrow('Something went wrong');
+		});
 	});
 
 	describe('ngrok', () => {
