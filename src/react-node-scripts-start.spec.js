@@ -17,18 +17,18 @@ jest.useFakeTimers();
 describe('react-node-scripts start', () => {
 	let files = {};
 
-	execa.mockImplementation(() => Promise.resolve());
-	execForeman.mockImplementation(() => Promise.resolve());
-	fs.existsSync.mockImplementation((filePath) => (
-		Object.prototype.hasOwnProperty.call(files, filePath)
-	));
+	beforeEach(() => {
+		execa.mockImplementation(() => Promise.resolve());
+		execForeman.mockImplementation(() => Promise.resolve());
+		fs.existsSync.mockImplementation((filePath) => (
+			Object.prototype.hasOwnProperty.call(files, filePath)
+		));
+	});
 
 	afterEach(() => {
 		files = {};
 
-		execa.mockClear();
-		execForeman.mockClear();
-		fs.existsSync.mockClear();
+		jest.resetAllMocks();
 	});
 
 	describe('node', () => {
@@ -150,14 +150,10 @@ describe('react-node-scripts start', () => {
 	});
 
 	describe('ngrok', () => {
-		ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
-		opn.mockImplementation(() => Promise.resolve());
-		setTimeout.mockImplementation((func) => func());
-
-		afterEach(() => {
-			ngrok.connect.mockClear();
-			opn.mockClear();
-			setTimeout.mockClear();
+		beforeEach(() => {
+			ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
+			opn.mockImplementation(() => Promise.resolve());
+			setTimeout.mockImplementation((func) => func());
 		});
 
 		it('is not passed to execForeman', async () => {

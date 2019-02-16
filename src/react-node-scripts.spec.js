@@ -8,10 +8,12 @@ jest.mock('child_process');
 describe('react-node-scripts', () => {
 	const nodePath = process.argv[0];
 
-	childProcess.spawn.mockImplementation(() => new EventEmitter());
+	beforeEach(() => {
+		childProcess.spawn.mockImplementation(() => new EventEmitter());
+	});
 
 	afterEach(() => {
-		childProcess.spawn.mockClear();
+		jest.resetAllMocks();
 	});
 
 	it('`build` spawns react-node-scripts-build', () => {

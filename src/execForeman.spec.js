@@ -9,15 +9,17 @@ jest.mock('fs');
 describe('execForeman', () => {
 	let files = {};
 
-	execa.mockImplementation(() => Promise.resolve());
-	fs.existsSync.mockImplementation((filePath) => (
-		Object.prototype.hasOwnProperty.call(files, filePath)
-	));
+	beforeEach(() => {
+		execa.mockImplementation(() => Promise.resolve());
+		fs.existsSync.mockImplementation((filePath) => (
+			Object.prototype.hasOwnProperty.call(files, filePath)
+		));
+	});
 
 	afterEach(() => {
 		files = {};
 
-		execa.mockClear();
+		jest.resetAllMocks();
 	});
 
 	it('executes foreman', async () => {
