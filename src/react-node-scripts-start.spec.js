@@ -205,11 +205,11 @@ describe('react-node-scripts start', () => {
 			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
 		});
 
-		it('doesn\'t execute ngrok & opn with --no-web', async () => {
+		it('doesn\'t execute ngrok & opn if web is disabled', async () => {
 			await start({ ngrok: true, web: false });
 
-			expect(ngrok.connect).not.toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
-			expect(opn).not.toHaveBeenCalledWith('https://foo-bar.com');
+			expect(ngrok.connect).not.toHaveBeenCalled();
+			expect(opn).not.toHaveBeenCalled();
 		});
 	});
 });
