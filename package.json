@@ -81,7 +81,8 @@
     "nodemon": "1.18.10",
     "opn": "5.4.0",
     "react-scripts": "2.1.5",
-    "redis-prebuilt": "1.0.2"
+    "redis-prebuilt": "1.0.2",
+    "universal-dotenv": "1.9.3"
   },
   "devDependencies": {
     "cz-conventional-changelog": "2.1.0",

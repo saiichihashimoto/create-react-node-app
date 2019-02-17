@@ -10,49 +10,61 @@ function build({ web = true, server = true } = {}) {
 			{
 				title: 'server',
 				skip:  () => !server,
-				task:  (output) => execa(
-					'babel',
-					[
-						'src',
+				task:  async (outputs) => {
+					const output = await execa(
+						'babel',
+						[
+							'src',
 
-						'--out-dir', 'lib',
-						'--config-file', path.resolve(__dirname, 'babel.config.js'),
-						'--copy-files',
-						'--delete-dir-on-start',
-						'--no-babelrc',
-						'--source-maps',
-						'--verbose',
-					],
-					{
-						env: {
-							...process.env,
-							NODE_ENV: 'production',
+							'--out-dir', 'lib',
+							'--config-file', path.resolve(__dirname, 'babel.config.js'),
+							'--copy-files',
+							'--delete-dir-on-start',
+							'--no-babelrc',
+							'--source-maps',
+							'--verbose',
+						],
+						{
+							env: {
+								...process.env,
+								NODE_ENV: 'production',
+							},
 						},
-					},
-				)
-					.then((obj) => output.push(obj)),
+					);
+
+					outputs.push(output);
+
+					return output;
+				},
 			},
 			{
 				title: 'web',
 				skip:  () => !web,
-				task:  (output) => execa(
-					'react-scripts',
-					[
-						'build',
-						'--color',
-					],
-					{
-						env: {
-							...process.env,
-							SKIP_PREFLIGHT_CHECK: true,
+				task:  async (outputs) => {
+					const output = await execa(
+						'react-scripts',
+						[
+							'build',
+							'--color',
+						],
+						{
+							env: {
+								...process.env,
+								SKIP_PREFLIGHT_CHECK: true,
+							},
 						},
-					},
-				)
-					.then((obj) => output.push(obj)),
+					);
+
+					outputs.push(output);
+
+					return output;
+				},
 			},
 		],
 		{
-			renderer: process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
+			renderer:    process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
+			exitOnError: false,
+			concurrent:  true,
 		},
 	)
 		.run([]);
@@ -66,11 +78,11 @@ if (require.main === module) {
 		.parse(process.argv);
 
 	build(process)
-		.then((output) => {
-			output
+		.then((outputs) => {
+			outputs
 				.filter(({ stdout }) => stdout)
 				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-			return output;
+			return outputs;
 		})
 		.catch((err) => {
 			const { errors = [] } = err;

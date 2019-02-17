@@ -44,7 +44,9 @@ export default {
 				loose: true,
 			},
 		],
-		'transform-dynamic-import',
+		[
+			'transform-dynamic-import',
+		],
 		[
 			'extension-resolver',
 			{
@@ -92,7 +94,6 @@ export default {
 			},
 			'file-loader-for-svgs',
 		],
-		'universal-dotenv',
 	],
 	env: {
 		production: {
@@ -102,6 +103,9 @@ export default {
 					{
 						removeImport: true,
 					},
+				],
+				[
+					'universal-dotenv',
 				],
 			],
 		},

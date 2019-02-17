@@ -38,7 +38,7 @@ describe('react-node-scripts build', () => {
 			);
 		});
 
-		it('an be disabled', async () => {
+		it('can be disabled', async () => {
 			await build({ server: false });
 
 			expect(execa).not.toHaveBeenCalledWith(

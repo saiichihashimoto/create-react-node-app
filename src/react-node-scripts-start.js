@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'universal-dotenv';
 import Listr from 'listr';
 import execa from 'execa';
 import opn from 'opn';
@@ -10,7 +11,14 @@ import { homedir } from 'os';
 import execForeman from './execForeman';
 
 async function start(args = {}) {
-	if (process.env.NODE_ENV === 'production') {
+	const {
+		env: {
+			PORT: port = 3000,
+			NODE_ENV,
+		},
+	} = process;
+
+	if (NODE_ENV === 'production') {
 		return execa(
 			'node',
 			[existsSync('./lib/index.server.js') ? 'lib/index.server' : 'lib'],
@@ -27,7 +35,6 @@ async function start(args = {}) {
 		redis,
 		ngrok: ngrokArg,
 	} = args;
-	const { env: { PORT: port = 3000 } } = process;
 	const ngrok = ngrokArg && web;
 
 	await new Listr(
@@ -44,7 +51,7 @@ async function start(args = {}) {
 			},
 		],
 		{
-			renderer:    process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
+			renderer:    NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
 			exitOnError: false,
 			concurrent:  true,
 		},
@@ -52,7 +59,7 @@ async function start(args = {}) {
 		.run();
 
 	/* istanbul ignore next line */
-	if (process.env.NODE_ENV !== 'test') {
+	if (NODE_ENV !== 'test') {
 		console.log(); // eslint-disable-line no-console
 	}
 
@@ -60,8 +67,11 @@ async function start(args = {}) {
 		execForeman({ web, server, mongod, redis, ngrok }),
 		// TODO Is there a good way to detect when react-scripts is ready?
 		ngrok && new Promise((resolve) => setTimeout(resolve, 2000))
-			.then(() => connectNgrok({ port }))
-			.then((url) => opn(url)),
+			.then(async () => {
+				const url = await connectNgrok({ port });
+
+				return opn(url);
+			}),
 	].filter(Boolean));
 }
 
