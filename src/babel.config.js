@@ -1,6 +1,12 @@
 import getCSSModuleLocalIdent from 'react-dev-utils/getCSSModuleLocalIdent'; // eslint-disable-line import/no-extraneous-dependencies
 
 const src = `${process.cwd()}/src`;
+const {
+	env: {
+		PUBLIC_URL = '',
+		NODE_ENV,
+	},
+} = process;
 
 export default {
 	only: [
@@ -26,7 +32,7 @@ export default {
 		[
 			'@babel/preset-react',
 			{
-				development: ['development', 'test'].includes(process.env.NODE_ENV),
+				development: ['development', 'test'].includes(NODE_ENV),
 				useBuiltIns: true,
 			},
 		],
@@ -67,18 +73,24 @@ export default {
 			},
 		],
 		[
-			'transform-assets',
+			'file-loader',
 			{
-				extensions: [
-					'bmp',
-					'gif',
-					'jpeg',
-					'jpg',
-					'png',
-				],
-				name:  `${process.env.PUBLIC_URL || ''}/static/media/[name].[hash:8].[ext]`,
-				limit: 10000,
+				outputPath: null,
+				publicPath: `${PUBLIC_URL || ''}/static/media`,
+				name:       '[name].[hash:8].[ext]',
+				extensions: ['bmp', 'gif', 'jpeg', 'jpg', 'png'],
+				limit:      10000,
 			},
+		],
+		[
+			'file-loader',
+			{
+				outputPath: null,
+				publicPath: `${PUBLIC_URL || ''}/static/media`,
+				name:       '[name].[hash:8].[ext]',
+				extensions: ['svg'],
+			},
+			'file-loader-for-svgs',
 		],
 		'universal-dotenv',
 	],

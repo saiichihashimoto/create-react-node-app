@@ -67,6 +67,7 @@
     "@babel/preset-react": "7.0.0",
     "babel-plugin-css-modules-transform": "1.6.2",
     "babel-plugin-extension-resolver": "github:GingerBear/babel-plugin-extension-resolver#03616d48fe9542a3e92bbb25c17c4f0437fe10cd",
+    "babel-plugin-file-loader": "1.1.1",
     "babel-plugin-transform-dynamic-import": "2.1.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "babel-plugin-universal-dotenv": "1.1.0",
