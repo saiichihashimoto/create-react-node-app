@@ -3,42 +3,33 @@ import 'universal-dotenv';
 import Listr from 'listr';
 import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
 import execa from 'execa';
-import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
 import path from 'path';
 import program from 'commander';
 import { connect as connectNgrok } from 'ngrok';
 import { existsSync } from 'fs';
 import { homedir } from 'os';
 
-async function start(args = {}) {
+async function start({
+	web = true,
+	server = true,
+	mongod,
+	redis,
+	ngrok: ngrokArg,
+} = {}) {
 	const {
 		env: {
 			PORT = 3000,
 			MONGOD_PORT = 27017,
 			REDIS_PORT = 6379,
+			BROWSER,
 			NODE_ENV,
 			...env
 		},
 	} = process;
 
 	if (NODE_ENV === 'production') {
-		return execa(
-			'node',
-			[existsSync('./lib/index.server.js') ? 'lib/index.server' : 'lib'],
-			{
-				stdio: [process.stdin, process.stdout, process.stderr],
-			},
-		);
+		return execa('node', [existsSync('./lib/index.server.js') ? 'lib/index.server' : 'lib'], { stdio: 'inherit' });
 	}
-
-	const {
-		web = true,
-		server = true,
-		mongod,
-		redis,
-		ngrok: ngrokArg,
-	} = args;
-	const ngrok = ngrokArg && web;
 
 	await new Listr(
 		[
@@ -76,12 +67,17 @@ async function start(args = {}) {
 		redis, // red
 	});
 
-	const foremanProcess = execa(
+	const ngrok = ngrokArg && web;
+
+	const NGROK_URL = ngrok ?
+		(await connectNgrok({ port: PORT })) :
+		undefined;
+
+	return execa(
 		'nf',
 		[
 			'start',
 			'--procfile', path.resolve(__dirname, 'Procfile'),
-
 			formation
 				.slice(0, formation.map(([, val]) => val).lastIndexOf(true) + 1)
 				.map(([key, val], index) => (val ? `${key}=1` : `foo${index + 1}=0`))
@@ -91,6 +87,7 @@ async function start(args = {}) {
 			env: {
 				...env,
 				NODE_ENV: 'development',
+				BROWSER,
 				PORT,
 
 				...(web && {
@@ -127,22 +124,14 @@ async function start(args = {}) {
 					// https://facebook.github.io/create-react-app/docs/proxying-api-requests-in-development#invalid-host-header-errors-after-configuring-proxy
 					DANGEROUSLY_DISABLE_HOST_CHECK: true,
 
-					// Disables the browser from opening
-					BROWSER: 'none',
+					NGROK_URL,
+					BROWSER:      path.resolve(__dirname, 'open-ngrok.js'),
+					REAL_BROWSER: BROWSER,
 				}),
 			},
-			stdio: [process.stdin, process.stdout, process.stderr],
+			stdio: 'inherit',
 		},
 	);
-
-	if (ngrok) {
-		await new Promise((resolve) => setTimeout(resolve, 2000));
-		const url = await connectNgrok({ port: PORT });
-
-		return openBrowser(url);
-	}
-
-	return foremanProcess;
 }
 
 /* istanbul ignore next line */

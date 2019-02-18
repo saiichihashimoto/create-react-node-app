@@ -2,7 +2,6 @@ import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line 
 import execa from 'execa';
 import fs from 'fs';
 import ngrok from 'ngrok';
-import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
 import path from 'path';
 import { homedir } from 'os';
 import start from './react-node-scripts-start';
@@ -10,9 +9,7 @@ import start from './react-node-scripts-start';
 jest.mock('execa');
 jest.mock('fs');
 jest.mock('ngrok');
-jest.mock('react-dev-utils/openBrowser');
 jest.mock('react-dev-utils/clearConsole');
-jest.useFakeTimers();
 
 describe('react-node-scripts start', () => {
 	let files = {};
@@ -43,11 +40,11 @@ describe('react-node-scripts start', () => {
 			expect(execa).not.toHaveBeenCalledWith('node', ['lib'], expect.anything());
 		});
 
-		it('executes with NODE_ENV=production', async () => {
+		it('executes if NODE_ENV=production', async () => {
 			process.env.NODE_ENV = 'production';
 			await start();
 
-			expect(execa).toHaveBeenCalledWith('node', ['lib'], expect.anything());
+			expect(execa).toHaveBeenCalledWith('node', ['lib'], expect.objectContaining({ stdio: 'inherit' }));
 		});
 
 		it('uses lib/index.server.js', async () => {
@@ -64,7 +61,7 @@ describe('react-node-scripts start', () => {
 		it('executes foreman', async () => {
 			await start();
 
-			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining(['start']), expect.anything());
+			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining(['start']), expect.objectContaining({ stdio: 'inherit' }));
 		});
 
 		it('uses Procfile', async () => {
@@ -80,12 +77,6 @@ describe('react-node-scripts start', () => {
 
 			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining(['--procfile', Procfile]), expect.anything());
 			expect(args.indexOf(Procfile)).toBe(args.indexOf('--procfile') + 1);
-		});
-
-		it('streams to process', async () => {
-			await start();
-
-			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ stdio: [process.stdin, process.stdout, process.stderr] }));
 		});
 
 		it('sets PORT=3000', async () => {
@@ -273,7 +264,7 @@ describe('react-node-scripts start', () => {
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ MONGOD_PORT: 27017 }) }));
 			});
 
-			it('passes MONGOD_PORT through', async () => {
+			it('uses defined MONGOD_PORT', async () => {
 				process.env.MONGOD_PORT = '4000';
 
 				await start({ mongod: true });
@@ -373,7 +364,7 @@ describe('react-node-scripts start', () => {
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REDIS_PORT: 6379 }) }));
 			});
 
-			it('passes REDIS_PORT through', async () => {
+			it('uses defined REDIS_PORT', async () => {
 				process.env.REDIS_PORT = '4000';
 
 				await start({ redis: true });
@@ -427,8 +418,6 @@ describe('react-node-scripts start', () => {
 	describe('ngrok', () => {
 		beforeEach(() => {
 			ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
-			openBrowser.mockImplementation(() => Promise.resolve());
-			setTimeout.mockImplementation((func) => func());
 		});
 
 		it('is disabled by default', async () => {
@@ -449,22 +438,38 @@ describe('react-node-scripts start', () => {
 			expect(ngrok.connect).not.toHaveBeenCalled();
 		});
 
-		it('opens a browser', async () => {
-			await start({ ngrok: true, web: true });
+		describe('foreman', () => {
+			const previousBrowser = process.env.BROWSER;
 
-			expect(openBrowser).toHaveBeenCalledWith('https://foo-bar.com');
-		});
+			afterEach(() => {
+				process.env.BROWSER = previousBrowser;
+			});
 
-		it('sets DANGEROUSLY_DISABLE_HOST_CHECK=true', async () => {
-			await start({ ngrok: true, web: true });
+			it('sets DANGEROUSLY_DISABLE_HOST_CHECK=true', async () => {
+				await start({ ngrok: true, web: true });
 
-			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ DANGEROUSLY_DISABLE_HOST_CHECK: true }) }));
-		});
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ DANGEROUSLY_DISABLE_HOST_CHECK: true }) }));
+			});
 
-		it('sets BROWSER=none', async () => {
-			await start({ ngrok: true, web: true });
+			it('sets BROWSER=open-ngrok.js', async () => {
+				await start({ ngrok: true, web: true });
 
-			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ BROWSER: 'none' }) }));
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ BROWSER: path.resolve(__dirname, 'open-ngrok.js') }) }));
+			});
+
+			it('sets REAL_BROWSER=$BROWSER', async () => {
+				process.env.BROWSER = 'some browser';
+
+				await start({ ngrok: true, web: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REAL_BROWSER: 'some browser' }) }));
+			});
+
+			it('sets NGROK_URL', async () => {
+				await start({ ngrok: true, web: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NGROK_URL: 'https://foo-bar.com' }) }));
+			});
 		});
 	});
 });
