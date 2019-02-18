@@ -5,10 +5,8 @@ import ngrok from 'ngrok';
 import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
 import path from 'path';
 import { homedir } from 'os';
-import execForeman from './execForeman';
 import start from './react-node-scripts-start';
 
-jest.mock('./execForeman');
 jest.mock('execa');
 jest.mock('fs');
 jest.mock('ngrok');
@@ -21,7 +19,6 @@ describe('react-node-scripts start', () => {
 
 	beforeEach(() => {
 		execa.mockImplementation(() => Promise.resolve());
-		execForeman.mockImplementation(() => Promise.resolve());
 		fs.existsSync.mockImplementation((filePath) => (
 			Object.prototype.hasOwnProperty.call(files, filePath)
 		));
@@ -63,7 +60,50 @@ describe('react-node-scripts start', () => {
 		});
 	});
 
-	describe('execForeman', () => {
+	describe('foreman', () => {
+		it('executes foreman', async () => {
+			await start();
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining(['start']), expect.anything());
+		});
+
+		it('uses Procfile', async () => {
+			const Procfile = path.resolve(__dirname, 'Procfile');
+			let args;
+			execa.mockImplementation((...input) => {
+				[, args] = input;
+
+				return Promise.resolve();
+			});
+
+			await start();
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining(['--procfile', Procfile]), expect.anything());
+			expect(args.indexOf(Procfile)).toBe(args.indexOf('--procfile') + 1);
+		});
+
+		it('streams to process', async () => {
+			await start();
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ stdio: [process.stdin, process.stdout, process.stderr] }));
+		});
+
+		it('sets PORT=3000', async () => {
+			await start();
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ PORT: 3000 }) }));
+		});
+
+		it('uses defined PORT', async () => {
+			process.env.PORT = 4000;
+
+			await start();
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ PORT: '4000' }) }));
+
+			delete process.env.PORT;
+		});
+
 		describe('output', () => {
 			const beforeIsTTY = process.stdout.isTTY;
 
@@ -92,13 +132,38 @@ describe('react-node-scripts start', () => {
 			it('is enabled by default', async () => {
 				await start();
 
-				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ web: true }));
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('web=1')]), expect.anything());
 			});
 
 			it('can be disabled', async () => {
 				await start({ web: false });
 
-				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ web: true }));
+				expect(execa).not.toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('web=1')]), expect.anything());
+			});
+
+			it('is third in formation', async () => {
+				await start({ web: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,web=1/)]), expect.anything());
+			});
+
+			it('sets WEB_PORT_OFFSET=-200', async () => {
+				await start({ web: true });
+
+				// 3000 + 200 - 200 = 3000
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ WEB_PORT_OFFSET: -200 }) }));
+			});
+
+			it('sets SKIP_PREFLIGHT_CHECK=true', async () => {
+				await start({ web: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ SKIP_PREFLIGHT_CHECK: true }) }));
+			});
+
+			it('sets NODE_ENV=development', async () => {
+				await start({ web: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_ENV: 'development' }) }));
 			});
 		});
 
@@ -106,13 +171,52 @@ describe('react-node-scripts start', () => {
 			it('is enabled by default', async () => {
 				await start();
 
-				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ server: true }));
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('server=1')]), expect.anything());
 			});
 
 			it('can be disabled', async () => {
 				await start({ server: false });
 
-				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ server: true }));
+				expect(execa).not.toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('server=1')]), expect.anything());
+			});
+
+			it('is first in formation', async () => {
+				await start({ server: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^server=1/)]), expect.anything());
+			});
+
+			it('sets SERVER_PORT_OFFSET=1000', async () => {
+				await start({ server: true });
+
+				// 3000 + 0 + 1000 = 4000
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ SERVER_PORT_OFFSET: 1000 }) }));
+			});
+
+			it('sets NODE_ENV=development', async () => {
+				await start({ server: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_ENV: 'development' }) }));
+			});
+
+			it('sets root=__dirname', async () => {
+				await start({ server: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ root: __dirname }) }));
+			});
+
+			it('sets src=src', async () => {
+				await start({ server: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ src: 'src' }) }));
+			});
+
+			it('sets src=src/index.server.js', async () => {
+				files = { './src/index.server.js': true };
+
+				await start({ server: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ src: 'src/index.server' }) }));
 			});
 		});
 
@@ -120,13 +224,19 @@ describe('react-node-scripts start', () => {
 			it('is disabled by default', async () => {
 				await start();
 
-				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
+				expect(execa).not.toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('mongod=1')]), expect.anything());
 			});
 
 			it('can be enabled', async () => {
 				await start({ mongod: true });
 
-				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('mongod=1')]), expect.anything());
+			});
+
+			it('is fourth in formation', async () => {
+				await start({ mongod: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,\w+=\d,mongod=1/)]), expect.anything());
 			});
 
 			it('prebuilds mongod', async () => {
@@ -156,19 +266,77 @@ describe('react-node-scripts start', () => {
 
 				await expect(start({ mongod: true })).rejects.toThrow('Something went wrong');
 			});
+
+			it('sets MONGOD_PORT=27017', async () => {
+				await start({ mongod: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ MONGOD_PORT: 27017 }) }));
+			});
+
+			it('passes MONGOD_PORT through', async () => {
+				process.env.MONGOD_PORT = '4000';
+
+				await start({ mongod: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ MONGOD_PORT: '4000' }) }));
+
+				delete process.env.MONGOD_PORT;
+			});
+
+			it('sets heroku mongodb addon variables', async () => {
+				await start({ mongod: true });
+
+				expect(execa).toHaveBeenCalledWith(
+					'nf',
+					expect.anything(),
+					expect.objectContaining({
+						env: expect.objectContaining({
+							MONGODB_URI: 'mongodb://localhost:27017/database',
+							MONGOHQ_URL: 'mongodb://localhost:27017/database',
+							ORMONGO_URL: 'mongodb://localhost:27017/database',
+						}),
+					}),
+				);
+			});
+
+			it('sets heroku mongod addon variables with MONGOD_PORT', async () => {
+				process.env.MONGOD_PORT = '4000';
+
+				await start({ mongod: true });
+
+				expect(execa).toHaveBeenCalledWith(
+					'nf',
+					expect.anything(),
+					expect.objectContaining({
+						env: expect.objectContaining({
+							MONGODB_URI: 'mongodb://localhost:4000/database',
+							MONGOHQ_URL: 'mongodb://localhost:4000/database',
+							ORMONGO_URL: 'mongodb://localhost:4000/database',
+						}),
+					}),
+				);
+
+				delete process.env.MONGOD_PORT;
+			});
 		});
 
 		describe('redis', () => {
 			it('is disabled by default', async () => {
 				await start();
 
-				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
+				expect(execa).not.toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('redis=1')]), expect.anything());
 			});
 
 			it('can be enabled', async () => {
 				await start({ redis: true });
 
-				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('redis=1')]), expect.anything());
+			});
+
+			it('is sixth in formation', async () => {
+				await start({ redis: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,\w+=\d,\w+=\d,\w+=\d,redis=1/)]), expect.anything());
 			});
 
 			it('prebuilds redis', async () => {
@@ -180,7 +348,7 @@ describe('react-node-scripts start', () => {
 			it('skips prebuilding redis if exists', async () => {
 				files = { [path.resolve(homedir(), '.redis-prebuilt')]: true };
 
-				await start({ mongod: true });
+				await start({ redis: true });
 
 				expect(execa).not.toHaveBeenCalledWith('redis', ['--version']);
 			});
@@ -198,46 +366,105 @@ describe('react-node-scripts start', () => {
 
 				await expect(start({ redis: true })).rejects.toThrow('Something went wrong');
 			});
+
+			it('sets REDIS_PORT=6379', async () => {
+				await start({ redis: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REDIS_PORT: 6379 }) }));
+			});
+
+			it('passes REDIS_PORT through', async () => {
+				process.env.REDIS_PORT = '4000';
+
+				await start({ redis: true });
+
+				// 4000 + 500 + 1779 = 6379
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REDIS_PORT: '4000' }) }));
+
+				delete process.env.REDIS_PORT;
+			});
+
+			it('sets heroku redis addon variables', async () => {
+				await start({ redis: true });
+
+				expect(execa).toHaveBeenCalledWith(
+					'nf',
+					expect.anything(),
+					expect.objectContaining({
+						env: expect.objectContaining({
+							OPENREDIS_URL:  'redis://localhost:6379',
+							REDISCLOUD_URL: 'redis://localhost:6379',
+							REDISGREEN_URL: 'redis://localhost:6379',
+							REDISTOGO_URL:  'redis://localhost:6379',
+						}),
+					}),
+				);
+			});
+
+			it('sets heroku redis addon variables with REDIS_PORT', async () => {
+				process.env.REDIS_PORT = '4000';
+
+				await start({ redis: true });
+
+				expect(execa).toHaveBeenCalledWith(
+					'nf',
+					expect.anything(),
+					expect.objectContaining({
+						env: expect.objectContaining({
+							OPENREDIS_URL:  'redis://localhost:4000',
+							REDISCLOUD_URL: 'redis://localhost:4000',
+							REDISGREEN_URL: 'redis://localhost:4000',
+							REDISTOGO_URL:  'redis://localhost:4000',
+						}),
+					}),
+				);
+
+				delete process.env.REDIS_PORT;
+			});
+		});
+	});
+
+	describe('ngrok', () => {
+		beforeEach(() => {
+			ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
+			openBrowser.mockImplementation(() => Promise.resolve());
+			setTimeout.mockImplementation((func) => func());
 		});
 
-		describe('ngrok', () => {
-			beforeEach(() => {
-				ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
-				openBrowser.mockImplementation(() => Promise.resolve());
-				setTimeout.mockImplementation((func) => func());
-			});
+		it('is disabled by default', async () => {
+			await start({ web: false });
 
-			it('is disabled by default', async () => {
-				await start();
+			expect(ngrok.connect).not.toHaveBeenCalled();
+		});
 
-				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
-			});
+		it('can be enabled', async () => {
+			await start({ ngrok: true, web: true });
 
-			it('can be enabled', async () => {
-				await start({ ngrok: true });
+			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
+		});
 
-				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
-			});
+		it('can\'t be enabled if web is disabled', async () => {
+			await start({ ngrok: true, web: false });
 
-			it('executes ngrok', async () => {
-				await start({ ngrok: true });
+			expect(ngrok.connect).not.toHaveBeenCalled();
+		});
 
-				expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
-				expect(openBrowser).toHaveBeenCalledWith('https://foo-bar.com');
-			});
+		it('opens a browser', async () => {
+			await start({ ngrok: true, web: true });
 
-			it('can\'t be enabled if web is disabled', async () => {
-				await start({ ngrok: true, web: false });
+			expect(openBrowser).toHaveBeenCalledWith('https://foo-bar.com');
+		});
 
-				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
-			});
+		it('sets DANGEROUSLY_DISABLE_HOST_CHECK=true', async () => {
+			await start({ ngrok: true, web: true });
 
-			it('doesn\'t execute ngrok if web is disabled', async () => {
-				await start({ ngrok: true, web: false });
+			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ DANGEROUSLY_DISABLE_HOST_CHECK: true }) }));
+		});
 
-				expect(ngrok.connect).not.toHaveBeenCalled();
-				expect(openBrowser).not.toHaveBeenCalled();
-			});
+		it('sets BROWSER=none', async () => {
+			await start({ ngrok: true, web: true });
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ BROWSER: 'none' }) }));
 		});
 	});
 });
