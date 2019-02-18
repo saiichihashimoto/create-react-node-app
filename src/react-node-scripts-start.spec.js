@@ -156,6 +156,16 @@ describe('react-node-scripts start', () => {
 
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_ENV: 'development' }) }));
 			});
+
+			it('unsets PUBLIC_URL', async () => {
+				process.env.PUBLIC_URL = 'something';
+
+				await start({ web: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.not.objectContaining({ PUBLIC_URL: expect.anything() }) }));
+
+				process.env.PUBLIC_URL = undefined;
+			});
 		});
 
 		describe('server', () => {
@@ -188,6 +198,16 @@ describe('react-node-scripts start', () => {
 				await start({ server: true });
 
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_ENV: 'development' }) }));
+			});
+
+			it('unsets PUBLIC_URL', async () => {
+				process.env.PUBLIC_URL = 'something';
+
+				await start({ server: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.not.objectContaining({ PUBLIC_URL: expect.anything() }) }));
+
+				process.env.PUBLIC_URL = undefined;
 			});
 
 			it('sets root=__dirname', async () => {

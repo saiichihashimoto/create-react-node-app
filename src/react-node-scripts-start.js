@@ -24,6 +24,7 @@ async function start({
 			BROWSER,
 			HTTPS,
 			NODE_ENV,
+			PUBLIC_URL,
 			...env
 		},
 	} = process;
