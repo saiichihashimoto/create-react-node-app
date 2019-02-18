@@ -416,8 +416,16 @@ describe('react-node-scripts start', () => {
 	});
 
 	describe('ngrok', () => {
+		const previousBrowser = process.env.BROWSER;
+		const previousHttps = process.env.HTTPS;
+
 		beforeEach(() => {
 			ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
+		});
+
+		afterEach(() => {
+			process.env.BROWSER = previousBrowser;
+			process.env.HTTPS = previousHttps;
 		});
 
 		it('is disabled by default', async () => {
@@ -429,7 +437,7 @@ describe('react-node-scripts start', () => {
 		it('can be enabled', async () => {
 			await start({ ngrok: true, web: true });
 
-			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
+			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000, host_header: 'localhost' }));
 		});
 
 		it('can\'t be enabled if web is disabled', async () => {
@@ -438,19 +446,21 @@ describe('react-node-scripts start', () => {
 			expect(ngrok.connect).not.toHaveBeenCalled();
 		});
 
+		it('sets bind_tls=false', async () => {
+			await start({ ngrok: true, web: true });
+
+			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ bind_tls: false }));
+		});
+
+		it('sets bind_tls=true if HTTPS=true', async () => {
+			process.env.HTTPS = 'true';
+
+			await start({ ngrok: true, web: true });
+
+			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ bind_tls: true }));
+		});
+
 		describe('foreman', () => {
-			const previousBrowser = process.env.BROWSER;
-
-			afterEach(() => {
-				process.env.BROWSER = previousBrowser;
-			});
-
-			it('sets DANGEROUSLY_DISABLE_HOST_CHECK=true', async () => {
-				await start({ ngrok: true, web: true });
-
-				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ DANGEROUSLY_DISABLE_HOST_CHECK: true }) }));
-			});
-
 			it('sets BROWSER=open-ngrok.js', async () => {
 				await start({ ngrok: true, web: true });
 
@@ -463,6 +473,12 @@ describe('react-node-scripts start', () => {
 				await start({ ngrok: true, web: true });
 
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REAL_BROWSER: 'some browser' }) }));
+			});
+
+			it('sets HTTPS=false', async () => {
+				await start({ ngrok: true, web: true });
+
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ HTTPS: false }) }));
 			});
 
 			it('sets NGROK_URL', async () => {

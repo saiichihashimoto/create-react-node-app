@@ -22,6 +22,7 @@ async function start({
 			MONGOD_PORT = 27017,
 			REDIS_PORT = 6379,
 			BROWSER,
+			HTTPS,
 			NODE_ENV,
 			...env
 		},
@@ -70,7 +71,11 @@ async function start({
 	const ngrok = ngrokArg && web;
 
 	const NGROK_URL = ngrok ?
-		(await connectNgrok({ port: PORT })) :
+		await connectNgrok({
+			bind_tls:    HTTPS === 'true',
+			host_header: 'localhost',
+			port:        PORT,
+		}) :
 		undefined;
 
 	return execa(
@@ -88,6 +93,7 @@ async function start({
 				...env,
 				NODE_ENV: 'development',
 				BROWSER,
+				HTTPS,
 				PORT,
 
 				...(web && {
@@ -118,15 +124,10 @@ async function start({
 				}),
 
 				...(ngrok && {
-					// We have to set DANGEROUSLY_DISABLE_HOST_CHECK
-					// Otherwise we get "Invalid Host header" error
-					// react-scripts binds to HOST if it's set, which is wrong
-					// https://facebook.github.io/create-react-app/docs/proxying-api-requests-in-development#invalid-host-header-errors-after-configuring-proxy
-					DANGEROUSLY_DISABLE_HOST_CHECK: true,
-
 					NGROK_URL,
 					BROWSER:      path.resolve(__dirname, 'open-ngrok.js'),
 					REAL_BROWSER: BROWSER,
+					HTTPS:        false,
 				}),
 			},
 			stdio: 'inherit',
