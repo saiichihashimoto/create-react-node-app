@@ -1,7 +1,8 @@
+import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
 import execa from 'execa';
 import fs from 'fs';
 import ngrok from 'ngrok';
-import opn from 'opn';
+import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
 import path from 'path';
 import { homedir } from 'os';
 import execForeman from './execForeman';
@@ -11,7 +12,8 @@ jest.mock('./execForeman');
 jest.mock('execa');
 jest.mock('fs');
 jest.mock('ngrok');
-jest.mock('opn');
+jest.mock('react-dev-utils/openBrowser');
+jest.mock('react-dev-utils/clearConsole');
 jest.useFakeTimers();
 
 describe('react-node-scripts start', () => {
@@ -61,155 +63,181 @@ describe('react-node-scripts start', () => {
 		});
 	});
 
-	describe('web', () => {
-		it('is passed to execForeman', async () => {
-			await start();
+	describe('execForeman', () => {
+		describe('output', () => {
+			const beforeIsTTY = process.stdout.isTTY;
 
-			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ web: true }));
-		});
-
-		it('can be disabled', async () => {
-			await start({ web: false });
-
-			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ web: true }));
-		});
-	});
-
-	describe('server', () => {
-		it('is passed to execForeman', async () => {
-			await start();
-
-			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ server: true }));
-		});
-
-		it('can be disabled', async () => {
-			await start({ server: false });
-
-			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ server: true }));
-		});
-	});
-
-	describe('mongod', () => {
-		it('is not passed to execForeman', async () => {
-			await start();
-
-			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
-		});
-
-		it('can be enabled', async () => {
-			await start({ mongod: true });
-
-			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
-		});
-
-		it('prebuilds mongod', async () => {
-			await start({ mongod: true });
-
-			expect(execa).toHaveBeenCalledWith('mongod', ['--version']);
-		});
-
-		it('skips prebuilding mongod if exists', async () => {
-			files = { [path.resolve(homedir(), '.mongodb-prebuilt')]: true };
-
-			await start({ mongod: true });
-
-			expect(execa).not.toHaveBeenCalledWith('mongod', ['--version']);
-		});
-
-		it('throws on failed prebuild', async () => {
-			execa.mockImplementation((command) => {
-				if (command !== 'mongod') {
-					return Promise.resolve();
-				}
-				const err = new Error('Error Message');
-				err.code = 1;
-
-				throw err;
+			afterEach(() => {
+				process.stdout.isTTY = beforeIsTTY;
 			});
 
-			await expect(start({ mongod: true })).rejects.toThrow('Something went wrong');
-		});
-	});
+			it('clears the console if isTTY', async () => {
+				process.stdout.isTTY = true;
 
-	describe('redis', () => {
-		it('is not passed to execForeman', async () => {
-			await start();
+				await start();
 
-			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
-		});
-
-		it('can be enabled', async () => {
-			await start({ redis: true });
-
-			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
-		});
-
-		it('prebuilds redis', async () => {
-			await start({ redis: true });
-
-			expect(execa).toHaveBeenCalledWith('redis-server', ['--version']);
-		});
-
-		it('skips prebuilding redis if exists', async () => {
-			files = { [path.resolve(homedir(), '.redis-prebuilt')]: true };
-
-			await start({ mongod: true });
-
-			expect(execa).not.toHaveBeenCalledWith('redis', ['--version']);
-		});
-
-		it('throws on failed prebuild', async () => {
-			execa.mockImplementation((command) => {
-				if (command !== 'redis-server') {
-					return Promise.resolve();
-				}
-				const err = new Error('Error Message');
-				err.code = 1;
-
-				throw err;
+				expect(clearConsole).toHaveBeenCalledWith();
 			});
 
-			await expect(start({ redis: true })).rejects.toThrow('Something went wrong');
-		});
-	});
+			it('does not clear the console if !isTTY', async () => {
+				process.stdout.isTTY = false;
 
-	describe('ngrok', () => {
-		beforeEach(() => {
-			ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
-			opn.mockImplementation(() => Promise.resolve());
-			setTimeout.mockImplementation((func) => func());
+				await start();
+
+				expect(clearConsole).not.toHaveBeenCalled();
+			});
 		});
 
-		it('is not passed to execForeman', async () => {
-			await start();
+		describe('web', () => {
+			it('is enabled by default', async () => {
+				await start();
 
-			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
+				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ web: true }));
+			});
+
+			it('can be disabled', async () => {
+				await start({ web: false });
+
+				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ web: true }));
+			});
 		});
 
-		it('can be enabled', async () => {
-			await start({ ngrok: true });
+		describe('server', () => {
+			it('is enabled by default', async () => {
+				await start();
 
-			expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
+				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ server: true }));
+			});
+
+			it('can be disabled', async () => {
+				await start({ server: false });
+
+				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ server: true }));
+			});
 		});
 
-		it('executes ngrok & opn', async () => {
-			await start({ ngrok: true });
+		describe('mongod', () => {
+			it('is disabled by default', async () => {
+				await start();
 
-			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
-			expect(opn).toHaveBeenCalledWith('https://foo-bar.com');
+				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
+			});
+
+			it('can be enabled', async () => {
+				await start({ mongod: true });
+
+				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ mongod: true }));
+			});
+
+			it('prebuilds mongod', async () => {
+				await start({ mongod: true });
+
+				expect(execa).toHaveBeenCalledWith('mongod', ['--version']);
+			});
+
+			it('skips prebuilding mongod if exists', async () => {
+				files = { [path.resolve(homedir(), '.mongodb-prebuilt')]: true };
+
+				await start({ mongod: true });
+
+				expect(execa).not.toHaveBeenCalledWith('mongod', ['--version']);
+			});
+
+			it('throws on failed prebuild', async () => {
+				execa.mockImplementation((command) => {
+					if (command !== 'mongod') {
+						return Promise.resolve();
+					}
+					const err = new Error('Error Message');
+					err.code = 1;
+
+					throw err;
+				});
+
+				await expect(start({ mongod: true })).rejects.toThrow('Something went wrong');
+			});
 		});
 
-		it('can\'t be enabled if web is disabled', async () => {
-			await start({ ngrok: true, web: false });
+		describe('redis', () => {
+			it('is disabled by default', async () => {
+				await start();
 
-			expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
+				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
+			});
+
+			it('can be enabled', async () => {
+				await start({ redis: true });
+
+				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ redis: true }));
+			});
+
+			it('prebuilds redis', async () => {
+				await start({ redis: true });
+
+				expect(execa).toHaveBeenCalledWith('redis-server', ['--version']);
+			});
+
+			it('skips prebuilding redis if exists', async () => {
+				files = { [path.resolve(homedir(), '.redis-prebuilt')]: true };
+
+				await start({ mongod: true });
+
+				expect(execa).not.toHaveBeenCalledWith('redis', ['--version']);
+			});
+
+			it('throws on failed prebuild', async () => {
+				execa.mockImplementation((command) => {
+					if (command !== 'redis-server') {
+						return Promise.resolve();
+					}
+					const err = new Error('Error Message');
+					err.code = 1;
+
+					throw err;
+				});
+
+				await expect(start({ redis: true })).rejects.toThrow('Something went wrong');
+			});
 		});
 
-		it('doesn\'t execute ngrok & opn if web is disabled', async () => {
-			await start({ ngrok: true, web: false });
+		describe('ngrok', () => {
+			beforeEach(() => {
+				ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
+				openBrowser.mockImplementation(() => Promise.resolve());
+				setTimeout.mockImplementation((func) => func());
+			});
 
-			expect(ngrok.connect).not.toHaveBeenCalled();
-			expect(opn).not.toHaveBeenCalled();
+			it('is disabled by default', async () => {
+				await start();
+
+				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
+			});
+
+			it('can be enabled', async () => {
+				await start({ ngrok: true });
+
+				expect(execForeman).toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
+			});
+
+			it('executes ngrok', async () => {
+				await start({ ngrok: true });
+
+				expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000 }));
+				expect(openBrowser).toHaveBeenCalledWith('https://foo-bar.com');
+			});
+
+			it('can\'t be enabled if web is disabled', async () => {
+				await start({ ngrok: true, web: false });
+
+				expect(execForeman).not.toHaveBeenCalledWith(expect.objectContaining({ ngrok: true }));
+			});
+
+			it('doesn\'t execute ngrok if web is disabled', async () => {
+				await start({ ngrok: true, web: false });
+
+				expect(ngrok.connect).not.toHaveBeenCalled();
+				expect(openBrowser).not.toHaveBeenCalled();
+			});
 		});
 	});
 });

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import 'universal-dotenv';
 import Listr from 'listr';
+import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
 import execa from 'execa';
-import opn from 'opn';
+import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
 import path from 'path';
 import program from 'commander';
 import { connect as connectNgrok } from 'ngrok';
@@ -58,9 +59,8 @@ async function start(args = {}) {
 	)
 		.run();
 
-	/* istanbul ignore next line */
-	if (NODE_ENV !== 'test') {
-		console.log(); // eslint-disable-line no-console
+	if (process.stdout.isTTY) {
+		clearConsole();
 	}
 
 	return Promise.all([
@@ -70,7 +70,7 @@ async function start(args = {}) {
 			.then(async () => {
 				const url = await connectNgrok({ port });
 
-				return opn(url);
+				return openBrowser(url);
 			}),
 	].filter(Boolean));
 }

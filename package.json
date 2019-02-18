@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib --source-maps --delete-dir-on-start --verbose --ignore \"**/*.spec.js\" && cp src/*.json lib && cp src/Procfile lib",
-    "test": "jest --verbose $(if [ -z \"$CI\" ]; then echo --watch; else echo --color --coverage; fi)",
+    "test": "jest --verbose $(if [ -z ${CI+x} ]; then echo --watch; else echo --color --coverage; fi)",
     "test-build": "cd test && npm ci && npm run build && npm run test"
   },
   "config": {
@@ -79,7 +79,6 @@
     "mongodb-prebuilt": "6.5.0",
     "ngrok": "3.1.1",
     "nodemon": "1.18.10",
-    "opn": "5.4.0",
     "react-scripts": "2.1.5",
     "redis-prebuilt": "1.0.2",
     "universal-dotenv": "1.9.3"
