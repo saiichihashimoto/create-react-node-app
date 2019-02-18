@@ -1,12 +1,15 @@
 import getCSSModuleLocalIdent from 'react-dev-utils/getCSSModuleLocalIdent'; // eslint-disable-line import/no-extraneous-dependencies
+import path from 'path';
 
 const src = `${process.cwd()}/src`;
 const {
 	env: {
-		PUBLIC_URL = '',
+		PUBLIC_URL = '/',
 		NODE_ENV,
 	},
 } = process;
+
+const publicPath = (NODE_ENV === 'production') ? PUBLIC_URL : '/';
 
 export default {
 	only: [
@@ -78,7 +81,7 @@ export default {
 			'file-loader',
 			{
 				outputPath: null,
-				publicPath: `${PUBLIC_URL || ''}/static/media`,
+				publicPath: path.resolve(publicPath, 'static/media'),
 				name:       '[name].[hash:8].[ext]',
 				extensions: ['bmp', 'gif', 'jpeg', 'jpg', 'png'],
 				limit:      10000,
@@ -88,7 +91,7 @@ export default {
 			'file-loader',
 			{
 				outputPath: null,
-				publicPath: `${PUBLIC_URL || ''}/static/media`,
+				publicPath: path.resolve(publicPath, 'static/media'),
 				name:       '[name].[hash:8].[ext]',
 				extensions: ['svg'],
 			},
