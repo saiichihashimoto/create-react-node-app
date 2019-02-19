@@ -80,7 +80,7 @@
     "ngrok": "3.1.1",
     "nodemon": "1.18.10",
     "react-scripts": "2.1.5",
-    "redis-prebuilt": "1.0.2",
+    "redis-prebuilt": "1.0.3",
     "universal-dotenv": "1.9.3"
   },
   "devDependencies": {
