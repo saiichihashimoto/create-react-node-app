@@ -1,6 +1,9 @@
 language: node_js
 node_js:
   - 11
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
 script:
   - npm test
   - npm run test-build
