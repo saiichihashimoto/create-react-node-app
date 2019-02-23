@@ -147,7 +147,7 @@ if (require.main === module) {
 		.parse(process.argv);
 
 	start(program)
-		.catch((err) => {
+		.catch((err) => { // eslint-disable-line promise/prefer-await-to-callbacks
 			const { errors = [] } = err;
 
 			/* istanbul ignore next line */

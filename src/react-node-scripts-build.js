@@ -78,13 +78,13 @@ if (require.main === module) {
 		.parse(process.argv);
 
 	build(process)
-		.then((outputs) => {
+		.then((outputs) => { // eslint-disable-line promise/prefer-await-to-then
 			outputs
 				.filter(({ stdout }) => stdout)
 				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
 			return outputs;
 		})
-		.catch((err) => {
+		.catch((err) => { // eslint-disable-line promise/prefer-await-to-callbacks
 			const { errors = [] } = err;
 
 			/* istanbul ignore next line */
