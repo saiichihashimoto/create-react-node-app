@@ -47,13 +47,13 @@ describe('react-node-scripts start', () => {
 			expect(execa).toHaveBeenCalledWith('node', ['lib'], expect.objectContaining({ stdio: 'inherit' }));
 		});
 
-		it('uses lib/index.server.js', async () => {
+		it('uses lib/index.node.js', async () => {
 			process.env.NODE_ENV = 'production';
-			files = { './lib/index.server.js': true };
+			files = { './lib/index.node.js': true };
 
 			await start();
 
-			expect(execa).toHaveBeenCalledWith('node', ['lib/index.server'], expect.anything());
+			expect(execa).toHaveBeenCalledWith('node', ['lib/index.node'], expect.anything());
 		});
 	});
 
@@ -168,34 +168,34 @@ describe('react-node-scripts start', () => {
 			});
 		});
 
-		describe('server', () => {
+		describe('node', () => {
 			it('is enabled by default', async () => {
 				await start();
 
-				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('server=1')]), expect.anything());
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('node=1')]), expect.anything());
 			});
 
 			it('can be disabled', async () => {
-				await start({ server: false });
+				await start({ node: false });
 
-				expect(execa).not.toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('server=1')]), expect.anything());
+				expect(execa).not.toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringContaining('node=1')]), expect.anything());
 			});
 
 			it('is first in formation', async () => {
-				await start({ server: true });
+				await start({ node: true });
 
-				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^server=1/)]), expect.anything());
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^node=1/)]), expect.anything());
 			});
 
-			it('sets SERVER_PORT_OFFSET=1000', async () => {
-				await start({ server: true });
+			it('sets NODE_PORT_OFFSET=1000', async () => {
+				await start({ node: true });
 
 				// 3000 + 0 + 1000 = 4000
-				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ SERVER_PORT_OFFSET: 1000 }) }));
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_PORT_OFFSET: 1000 }) }));
 			});
 
 			it('sets NODE_ENV=development', async () => {
-				await start({ server: true });
+				await start({ node: true });
 
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_ENV: 'development' }) }));
 			});
@@ -203,7 +203,7 @@ describe('react-node-scripts start', () => {
 			it('unsets PUBLIC_URL', async () => {
 				process.env.PUBLIC_URL = 'something';
 
-				await start({ server: true });
+				await start({ node: true });
 
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.not.objectContaining({ PUBLIC_URL: expect.anything() }) }));
 
@@ -211,23 +211,23 @@ describe('react-node-scripts start', () => {
 			});
 
 			it('sets root=__dirname', async () => {
-				await start({ server: true });
+				await start({ node: true });
 
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ root: __dirname }) }));
 			});
 
 			it('sets src=src', async () => {
-				await start({ server: true });
+				await start({ node: true });
 
 				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ src: 'src' }) }));
 			});
 
-			it('sets src=src/index.server.js', async () => {
-				files = { './src/index.server.js': true };
+			it('sets src=src/index.node.js', async () => {
+				files = { './src/index.node.js': true };
 
-				await start({ server: true });
+				await start({ node: true });
 
-				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ src: 'src/index.server' }) }));
+				expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ src: 'src/index.node' }) }));
 			});
 		});
 

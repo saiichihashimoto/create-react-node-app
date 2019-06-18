@@ -4,12 +4,12 @@ import execa from 'execa';
 import path from 'path';
 import program from 'commander';
 
-function build({ web = true, server = true } = {}) {
+function build({ web = true, node = true } = {}) {
 	return new Listr(
 		[
 			{
-				title: 'server',
-				skip:  () => !server,
+				title: 'node',
+				skip:  () => !node,
 				task:  async (outputs) => {
 					const output = await execa(
 						'babel',
@@ -74,7 +74,7 @@ function build({ web = true, server = true } = {}) {
 if (require.main === module) {
 	program
 		.option('--no-web')
-		.option('--no-server')
+		.option('--no-node')
 		.parse(process.argv);
 
 	build(process)

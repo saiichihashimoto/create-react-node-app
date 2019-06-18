@@ -11,7 +11,7 @@ import { homedir } from 'os';
 
 async function start({
 	web = true,
-	server = true,
+	node = true,
 	mongod,
 	redis,
 	ngrok: ngrokArg,
@@ -30,7 +30,7 @@ async function start({
 	} = process;
 
 	if (NODE_ENV === 'production') {
-		return execa('node', [existsSync('./lib/index.server.js') ? 'lib/index.server' : 'lib'], { stdio: 'inherit' });
+		return execa('node', [existsSync('./lib/index.node.js') ? 'lib/index.node' : 'lib'], { stdio: 'inherit' });
 	}
 
 	await new Listr(
@@ -61,7 +61,7 @@ async function start({
 	// https://github.com/strongloop/node-foreman/blob/master/lib/colors.js#L7
 	// The order dictates the color
 	const formation = Object.entries({
-		server, // magenta
+		node, // magenta
 		foo2: false, // blue
 		web, // cyan
 		mongod, // green
@@ -102,10 +102,10 @@ async function start({
 					SKIP_PREFLIGHT_CHECK: true,
 				}),
 
-				...(server && {
-					SERVER_PORT_OFFSET: 1000 - 100 * formation.findIndex(([key]) => key === 'server'),
-					src:                existsSync('./src/index.server.js') ? 'src/index.server' : 'src',
-					root:               __dirname,
+				...(node && {
+					NODE_PORT_OFFSET: 1000 - 100 * formation.findIndex(([key]) => key === 'node'),
+					src:              existsSync('./src/index.node.js') ? 'src/index.node' : 'src',
+					root:             __dirname,
 				}),
 
 				...(mongod && {
@@ -143,7 +143,7 @@ if (require.main === module) {
 		.option('--redis')
 		.option('--ngrok')
 		.option('--no-web')
-		.option('--no-server')
+		.option('--no-node')
 		.parse(process.argv);
 
 	start(program)
