@@ -53,7 +53,7 @@ export default {
 			'extension-resolver',
 			{
 				extensions: moduleFileExtensions
-					.map((ext) => `.${ext.replace(/web\./, 'server.')}`),
+					.map((ext) => `.${ext.replace(/web\./, 'node.')}`),
 			},
 		],
 		[

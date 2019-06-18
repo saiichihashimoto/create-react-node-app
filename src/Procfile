@@ -1,5 +1,5 @@
 web:    cross-env PORT=`expr $PORT + $WEB_PORT_OFFSET` react-scripts start --color
-server: cross-env PORT=`expr $PORT + $SERVER_PORT_OFFSET` nodemon --config $root/nodemon.json --exec babel-node $src -- --config-file=$root/babel.config.js --no-babelrc
+node: cross-env PORT=`expr $PORT + $NODE_PORT_OFFSET` nodemon --config $root/nodemon.json --exec babel-node $src -- --config-file=$root/babel.config.js --no-babelrc
 mongod: mkdir -p data/db && mongod --dbpath data/db --bind_ip 127.0.0.1 --port $MONGOD_PORT
 redis:  redis-server --port $REDIS_PORT
 
