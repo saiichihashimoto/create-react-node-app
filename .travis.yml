@@ -8,7 +8,7 @@ script:
   - npm test
   - npm run test-build
 after_success:
-  - npx codecov
+  - cat ./coverage/lcov.info | npx coveralls
 jobs:
   include:
     - stage: release
