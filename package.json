@@ -80,7 +80,7 @@
     "ngrok": "3.2.1",
     "nodemon": "1.19.1",
     "react-scripts": "3.0.1",
-    "redis-prebuilt": "1.0.13",
+    "redis-prebuilt": "1.0.14",
     "universal-dotenv": "2.0.0"
   },
   "devDependencies": {
@@ -88,7 +88,7 @@
     "eslint-config-saiichihashimoto": "1.2.31",
     "husky": "2.5.0",
     "jest": "24.1.0",
-    "lint-my-app": "3.3.32",
+    "lint-my-app": "3.3.31",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "stylelint-config-saiichihashimoto": "1.0.17"
