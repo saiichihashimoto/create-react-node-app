@@ -86,9 +86,9 @@
   "devDependencies": {
     "cz-conventional-changelog": "2.1.0",
     "eslint-config-saiichihashimoto": "1.2.32",
-    "husky": "2.5.0",
+    "husky": "2.6.0",
     "jest": "24.1.0",
-    "lint-my-app": "3.3.31",
+    "lint-my-app": "3.3.33",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "stylelint-config-saiichihashimoto": "1.0.17"
