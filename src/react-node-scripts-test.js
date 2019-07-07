@@ -22,6 +22,7 @@ function runTest(args) {
 /* istanbul ignore next line */
 if (require.main === module) {
 	runTest(process.argv.slice(2))
-		.catch(({ code }) => process.exit(code || 1));
+		// eslint-disable-next-line promise/prefer-await-to-callbacks
+		.catch((err) => process.exit(err.code || 1));
 }
 export default (...args) => runTest(args);
