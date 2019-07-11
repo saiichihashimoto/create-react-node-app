@@ -77,7 +77,7 @@ if (require.main === module) {
 		.option('--no-node')
 		.parse(process.argv);
 
-	build(process)
+	build(program)
 		.then((outputs) => { // eslint-disable-line promise/prefer-await-to-then
 			outputs
 				.filter(({ stdout }) => stdout)
