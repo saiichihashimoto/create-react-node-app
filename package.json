@@ -92,7 +92,7 @@
     "lint-my-app": "3.6.0",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "stylelint-config-saiichihashimoto": "2.0.5"
+    "stylelint-config-saiichihashimoto": "2.0.6"
   },
   "peerDependencies": {
     "react": "*",
