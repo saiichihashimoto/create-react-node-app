@@ -8,7 +8,7 @@ const {
 	},
 } = process;
 
-const publicPath = (NODE_ENV === 'production') ? paths.servedPath : '/';
+const publicPath = NODE_ENV === 'production' ? paths.servedPath : '/';
 
 export default {
 	only: [
@@ -53,7 +53,7 @@ export default {
 			'extension-resolver',
 			{
 				extensions: moduleFileExtensions
-					.map((ext) => `.${ext.replace(/web\./, 'node.')}`),
+					.map((ext) => `.${ext.replace(/web\./u, 'node.')}`),
 			},
 		],
 		[

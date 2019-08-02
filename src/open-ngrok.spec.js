@@ -1,5 +1,7 @@
-import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
 import path from 'path';
+
+import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
+
 import openNgrok from './open-ngrok';
 
 jest.mock('react-dev-utils/openBrowser');

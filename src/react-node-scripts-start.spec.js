@@ -1,9 +1,11 @@
-import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
-import execa from 'execa';
 import fs from 'fs';
-import ngrok from 'ngrok';
 import path from 'path';
 import { homedir } from 'os';
+
+import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
+import execa from 'execa';
+import ngrok from 'ngrok';
+
 import start from './react-node-scripts-start';
 
 jest.mock('execa');
@@ -16,9 +18,9 @@ describe('react-node-scripts start', () => {
 
 	beforeEach(() => {
 		execa.mockImplementation(() => Promise.resolve());
-		fs.existsSync.mockImplementation((filePath) => (
-			Object.prototype.hasOwnProperty.call(files, filePath)
-		));
+		fs.existsSync.mockImplementation(
+			(filePath) => Object.prototype.hasOwnProperty.call(files, filePath)
+		);
 	});
 
 	afterEach(() => {
@@ -135,7 +137,7 @@ describe('react-node-scripts start', () => {
 			it('is third in formation', async () => {
 				await start({ web: true });
 
-				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,web=1/)]), expect.anything());
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,web=1/u)]), expect.anything());
 			});
 
 			it('sets WEB_PORT_OFFSET=-200', async () => {
@@ -184,7 +186,7 @@ describe('react-node-scripts start', () => {
 			it('is first in formation', async () => {
 				await start({ node: true });
 
-				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^node=1/)]), expect.anything());
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^node=1/u)]), expect.anything());
 			});
 
 			it('sets NODE_PORT_OFFSET=1000', async () => {
@@ -247,7 +249,7 @@ describe('react-node-scripts start', () => {
 			it('is fourth in formation', async () => {
 				await start({ mongod: true });
 
-				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,\w+=\d,mongod=1/)]), expect.anything());
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,\w+=\d,mongod=1/u)]), expect.anything());
 			});
 
 			it('prebuilds mongod', async () => {
@@ -306,7 +308,7 @@ describe('react-node-scripts start', () => {
 							MONGOHQ_URL: 'mongodb://localhost:27017/database',
 							ORMONGO_URL: 'mongodb://localhost:27017/database',
 						}),
-					}),
+					})
 				);
 			});
 
@@ -324,7 +326,7 @@ describe('react-node-scripts start', () => {
 							MONGOHQ_URL: 'mongodb://localhost:4000/database',
 							ORMONGO_URL: 'mongodb://localhost:4000/database',
 						}),
-					}),
+					})
 				);
 
 				delete process.env.MONGOD_PORT;
@@ -347,7 +349,7 @@ describe('react-node-scripts start', () => {
 			it('is sixth in formation', async () => {
 				await start({ redis: true });
 
-				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,\w+=\d,\w+=\d,\w+=\d,redis=1/)]), expect.anything());
+				expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,\w+=\d,\w+=\d,\w+=\d,redis=1/u)]), expect.anything());
 			});
 
 			it('prebuilds redis', async () => {
@@ -408,7 +410,7 @@ describe('react-node-scripts start', () => {
 							REDISGREEN_URL: 'redis://localhost:6379',
 							REDISTOGO_URL:  'redis://localhost:6379',
 						}),
-					}),
+					})
 				);
 			});
 
@@ -427,7 +429,7 @@ describe('react-node-scripts start', () => {
 							REDISGREEN_URL: 'redis://localhost:4000',
 							REDISTOGO_URL:  'redis://localhost:4000',
 						}),
-					}),
+					})
 				);
 
 				delete process.env.REDIS_PORT;
@@ -469,7 +471,8 @@ describe('react-node-scripts start', () => {
 		it('sets bind_tls=false', async () => {
 			await start({ ngrok: true, web: true });
 
-			expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ bind_tls: false }));
+			expect(ngrok.connect)
+				.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: false }));
 		});
 
 		it('sets bind_tls=true if HTTPS=true', async () => {

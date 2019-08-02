@@ -1,5 +1,7 @@
-import execa from 'execa';
 import path from 'path';
+
+import execa from 'execa';
+
 import build from './react-node-scripts-build';
 
 jest.mock('execa');
@@ -22,8 +24,10 @@ describe('react-node-scripts build', () => {
 				[
 					'src',
 
-					'--out-dir', 'lib',
-					'--config-file', path.resolve(__dirname, 'babel.config.js'),
+					'--out-dir',
+					'lib',
+					'--config-file',
+					path.resolve(__dirname, 'babel.config.js'),
 					'--copy-files',
 					'--delete-dir-on-start',
 					'--no-babelrc',
@@ -34,7 +38,7 @@ describe('react-node-scripts build', () => {
 					env: expect.objectContaining({
 						NODE_ENV: 'production',
 					}),
-				}),
+				})
 			);
 		});
 
@@ -46,8 +50,10 @@ describe('react-node-scripts build', () => {
 				[
 					'src',
 
-					'--out-dir', 'lib',
-					'--config-file', path.resolve(__dirname, 'babel.config.js'),
+					'--out-dir',
+					'lib',
+					'--config-file',
+					path.resolve(__dirname, 'babel.config.js'),
 					'--copy-files',
 					'--delete-dir-on-start',
 					'--no-babelrc',
@@ -58,7 +64,7 @@ describe('react-node-scripts build', () => {
 					env: expect.objectContaining({
 						NODE_ENV: 'production',
 					}),
-				}),
+				})
 			);
 		});
 	});
@@ -74,7 +80,7 @@ describe('react-node-scripts build', () => {
 					env: expect.objectContaining({
 						SKIP_PREFLIGHT_CHECK: true,
 					}),
-				}),
+				})
 			);
 		});
 
@@ -88,7 +94,7 @@ describe('react-node-scripts build', () => {
 					env: expect.objectContaining({
 						SKIP_PREFLIGHT_CHECK: true,
 					}),
-				}),
+				})
 			);
 		});
 	});

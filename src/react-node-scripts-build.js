@@ -1,7 +1,7 @@
-#!/usr/bin/env node
+import path from 'path';
+
 import Listr from 'listr';
 import execa from 'execa';
-import path from 'path';
 import program from 'commander';
 
 function build({ web = true, node = true } = {}) {
@@ -10,14 +10,16 @@ function build({ web = true, node = true } = {}) {
 			{
 				title: 'node',
 				skip:  () => !node,
-				task:  async (outputs) => {
+				async task(outputs) {
 					const output = await execa(
 						'babel',
 						[
 							'src',
 
-							'--out-dir', 'lib',
-							'--config-file', path.resolve(__dirname, 'babel.config.js'),
+							'--out-dir',
+							'lib',
+							'--config-file',
+							path.resolve(__dirname, 'babel.config.js'),
 							'--copy-files',
 							'--delete-dir-on-start',
 							'--no-babelrc',
@@ -29,7 +31,7 @@ function build({ web = true, node = true } = {}) {
 								...process.env,
 								NODE_ENV: 'production',
 							},
-						},
+						}
 					);
 
 					outputs.push(output);
@@ -40,7 +42,7 @@ function build({ web = true, node = true } = {}) {
 			{
 				title: 'web',
 				skip:  () => !web,
-				task:  async (outputs) => {
+				async task(outputs) {
 					const output = await execa(
 						'react-scripts',
 						[
@@ -52,7 +54,7 @@ function build({ web = true, node = true } = {}) {
 								...process.env,
 								SKIP_PREFLIGHT_CHECK: true,
 							},
-						},
+						}
 					);
 
 					outputs.push(output);
@@ -65,7 +67,7 @@ function build({ web = true, node = true } = {}) {
 			renderer:    process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
 			exitOnError: false,
 			concurrent:  true,
-		},
+		}
 	)
 		.run([]);
 }
@@ -82,6 +84,7 @@ if (require.main === module) {
 			outputs
 				.filter(({ stdout }) => stdout)
 				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
+
 			return outputs;
 		})
 		.catch((err) => { // eslint-disable-line promise/prefer-await-to-callbacks
@@ -99,4 +102,5 @@ if (require.main === module) {
 			process.exit(err.code || (errors.find(({ code }) => code) || {}).code || 1);
 		});
 }
+
 export default build;

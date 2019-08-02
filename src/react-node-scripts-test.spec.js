@@ -1,4 +1,5 @@
 import execa from 'execa';
+
 import runTest from './react-node-scripts-test';
 
 jest.mock('execa');
@@ -23,7 +24,7 @@ describe('react-node-scripts test', () => {
 					env: expect.objectContaining({
 						SKIP_PREFLIGHT_CHECK: true,
 					}),
-				}),
+				})
 			);
 		});
 
@@ -37,7 +38,7 @@ describe('react-node-scripts test', () => {
 					env: expect.objectContaining({
 						SKIP_PREFLIGHT_CHECK: true,
 					}),
-				}),
+				})
 			);
 		});
 	});
