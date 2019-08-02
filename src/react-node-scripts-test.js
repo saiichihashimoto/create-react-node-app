@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import execa from 'execa';
 
 function runTest(args) {
@@ -15,7 +14,7 @@ function runTest(args) {
 				SKIP_PREFLIGHT_CHECK: true,
 			},
 			stdio: [process.stdin, process.stdout, process.stderr],
-		},
+		}
 	);
 }
 
@@ -25,4 +24,5 @@ if (require.main === module) {
 		// eslint-disable-next-line promise/prefer-await-to-callbacks
 		.catch((err) => process.exit(err.code || 1));
 }
+
 export default (...args) => runTest(args);

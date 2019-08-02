@@ -1,13 +1,13 @@
-#!/usr/bin/env node
 import 'universal-dotenv';
+import path from 'path';
+import { existsSync } from 'fs';
+import { homedir } from 'os';
+
 import Listr from 'listr';
 import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
 import execa from 'execa';
-import path from 'path';
 import program from 'commander';
 import { connect as connectNgrok } from 'ngrok';
-import { existsSync } from 'fs';
-import { homedir } from 'os';
 
 async function start({
 	web = true,
@@ -50,7 +50,7 @@ async function start({
 			renderer:    NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
 			exitOnError: false,
 			concurrent:  true,
-		},
+		}
 	)
 		.run();
 
@@ -58,8 +58,11 @@ async function start({
 		clearConsole();
 	}
 
-	// https://github.com/strongloop/node-foreman/blob/master/lib/colors.js#L7
-	// The order dictates the color
+	/*
+	 * https://github.com/strongloop/node-foreman/blob/master/lib/colors.js#L7
+	 * The order dictates the color
+	 */
+
 	const formation = Object.entries({
 		node, // magenta
 		foo2: false, // blue
@@ -71,19 +74,20 @@ async function start({
 
 	const ngrok = ngrokArg && web;
 
-	const NGROK_URL = ngrok ?
-		await connectNgrok({
+	const NGROK_URL = ngrok
+		? await connectNgrok({
 			bind_tls:    HTTPS === 'true',
 			host_header: 'localhost',
 			port:        PORT,
-		}) :
-		undefined;
+		})
+		: undefined;
 
 	return execa(
 		'nf',
 		[
 			'start',
-			'--procfile', path.resolve(__dirname, 'Procfile'),
+			'--procfile',
+			path.resolve(__dirname, 'Procfile'),
 			formation
 				.slice(0, formation.map(([, val]) => val).lastIndexOf(true) + 1)
 				.map(([key, val], index) => (val ? `${key}=1` : `foo${index + 1}=0`))
@@ -97,42 +101,42 @@ async function start({
 				HTTPS,
 				PORT,
 
-				...(web && {
+				...web && {
 					WEB_PORT_OFFSET:      -100 * formation.findIndex(([key]) => key === 'web'),
 					SKIP_PREFLIGHT_CHECK: true,
-				}),
+				},
 
-				...(node && {
-					NODE_PORT_OFFSET: 1000 - 100 * formation.findIndex(([key]) => key === 'node'),
+				...node && {
+					NODE_PORT_OFFSET: 1000 - (100 * formation.findIndex(([key]) => key === 'node')),
 					src:              existsSync('./src/index.node.js') ? 'src/index.node' : 'src',
 					root:             __dirname,
-				}),
+				},
 
-				...(mongod && {
+				...mongod && {
 					MONGOD_PORT,
 					MONGODB_URI: `mongodb://localhost:${MONGOD_PORT}/database`,
 					MONGOHQ_URL: `mongodb://localhost:${MONGOD_PORT}/database`,
 					ORMONGO_URL: `mongodb://localhost:${MONGOD_PORT}/database`,
-				}),
+				},
 
-				...(redis && {
+				...redis && {
 					REDIS_PORT,
 					OPENREDIS_URL:  `redis://localhost:${REDIS_PORT}`,
 					REDISCLOUD_URL: `redis://localhost:${REDIS_PORT}`,
 					REDISGREEN_URL: `redis://localhost:${REDIS_PORT}`,
 					REDISTOGO_URL:  `redis://localhost:${REDIS_PORT}`,
 					REDIS_URL:      `redis://localhost:${REDIS_PORT}`,
-				}),
+				},
 
-				...(ngrok && {
+				...ngrok && {
 					NGROK_URL,
 					BROWSER:      path.resolve(__dirname, 'open-ngrok.js'),
 					REAL_BROWSER: BROWSER,
 					HTTPS:        false,
-				}),
+				},
 			},
 			stdio: 'inherit',
-		},
+		}
 	);
 }
 

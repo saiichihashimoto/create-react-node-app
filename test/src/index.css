@@ -1,5 +1,8 @@
 /* stylelint-disable selector-max-type */
+
 body {
+	padding: 0;
+	margin: 0;
 	font-family:
 		-apple-system,
 		BlinkMacSystemFont,
@@ -14,16 +17,14 @@ body {
 		sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	margin: 0;
-	padding: 0;
 }
 
 code {
 	font-family:
-		source-code-pro,
-		Menlo,
-		Monaco,
-		Consolas,
+		'source-code-pro',
+		'Menlo',
+		'Monaco',
+		'Consolas',
 		'Courier New',
 		monospace;
 }

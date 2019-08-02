@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import childProcess from 'child_process';
 import path from 'path';
+
 import reactNodeScripts from './react-node-scripts';
 
 jest.mock('child_process');
