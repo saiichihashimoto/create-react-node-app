@@ -81,7 +81,7 @@
     "nodemon": "1.19.1",
     "react-scripts": "3.0.1",
     "redis-prebuilt": "1.0.25",
-    "universal-dotenv": "2.0.0",
+    "universal-dotenv": "3.0.0",
     "update-notifier": "3.0.1"
   },
   "devDependencies": {
