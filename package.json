@@ -79,14 +79,14 @@
     "mongodb-prebuilt": "6.5.0",
     "ngrok": "3.2.4",
     "nodemon": "1.19.1",
-    "react-scripts": "3.0.1",
+    "react-scripts": "3.1.0",
     "redis-prebuilt": "1.0.25",
     "universal-dotenv": "3.0.1",
     "update-notifier": "3.0.1"
   },
   "devDependencies": {
     "cz-conventional-changelog": "3.0.2",
-    "eslint-config-saiichihashimoto": "2.0.25",
+    "eslint-config-saiichihashimoto": "2.0.26",
     "husky": "3.0.3",
     "jest": "24.1.0",
     "lint-my-app": "3.7.4",
