@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import fs from 'fs';
 import path from 'path';
 import { homedir } from 'os';
@@ -39,14 +40,14 @@ describe('react-node-scripts start', () => {
 		it('doesn\'t execute', async () => {
 			await start();
 
-			expect(execa).not.toHaveBeenCalledWith('node', ['lib'], expect.anything());
+			expect(execa).not.toHaveBeenCalledWith('forever', expect.anything(), expect.anything());
 		});
 
 		it('executes if NODE_ENV=production', async () => {
 			process.env.NODE_ENV = 'production';
 			await start();
 
-			expect(execa).toHaveBeenCalledWith('node', ['lib'], expect.objectContaining({ stdio: 'inherit' }));
+			expect(execa).toHaveBeenCalledWith('forever', ['lib/index.js'], expect.objectContaining({ stdio: 'inherit' }));
 		});
 
 		it('uses lib/index.node.js', async () => {
@@ -55,7 +56,7 @@ describe('react-node-scripts start', () => {
 
 			await start();
 
-			expect(execa).toHaveBeenCalledWith('node', ['lib/index.node'], expect.anything());
+			expect(execa).toHaveBeenCalledWith('forever', ['lib/index.node.js'], expect.objectContaining({ stdio: 'inherit' }));
 		});
 	});
 
