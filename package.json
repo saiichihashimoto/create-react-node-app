@@ -75,6 +75,7 @@
     "cross-env": "5.2.0",
     "execa": "2.0.3",
     "foreman": "3.0.1",
+    "forever": "1.0.0",
     "listr": "0.14.3",
     "mongodb-prebuilt": "6.5.0",
     "ngrok": "3.2.4",

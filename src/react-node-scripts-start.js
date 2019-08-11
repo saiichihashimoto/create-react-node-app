@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import 'universal-dotenv';
 import path from 'path';
 import { existsSync } from 'fs';
@@ -30,7 +31,7 @@ async function start({
 	} = process;
 
 	if (NODE_ENV === 'production') {
-		return execa('node', [existsSync('./lib/index.node.js') ? 'lib/index.node' : 'lib'], { stdio: 'inherit' });
+		return execa('forever', [existsSync('./lib/index.node.js') ? 'lib/index.node.js' : 'lib/index.js'], { stdio: 'inherit' });
 	}
 
 	await new Listr(
@@ -163,7 +164,7 @@ if (require.main === module) {
 				.filter(({ stderr }) => stderr)
 				.forEach(({ stderr }) => console.error(stderr)); // eslint-disable-line no-console
 
-			process.exit(err.code || (errors.find(({ code }) => code) || {}).code || 1);
+			process.exit(err.code || (errors.find(({ code }) => code) || {}).code || 1); // eslint-disable-line unicorn/no-process-exit
 		});
 }
 
