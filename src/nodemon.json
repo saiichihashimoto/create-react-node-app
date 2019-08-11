@@ -5,7 +5,7 @@
   "ignore": [
     "**/*.spec.js",
     "**/*.test.js",
-    "**/*.web.js",
+    "**/*.web.*",
     "setupProxy.js",
     "setupTests.js"
   ]
