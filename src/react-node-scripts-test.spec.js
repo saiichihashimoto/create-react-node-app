@@ -12,7 +12,7 @@ afterEach(() => {
 	jest.resetAllMocks();
 });
 
-it('executes', async () => {
+it('executes react-scripts test', async () => {
 	await expect(runTest()).resolves;
 
 	expect(execa).toHaveBeenCalledWith(
@@ -22,20 +22,13 @@ it('executes', async () => {
 			env: expect.objectContaining({
 				SKIP_PREFLIGHT_CHECK: true,
 			}),
+			stdio: 'inherit',
 		})
 	);
 });
 
 it('consumes arguments', async () => {
-	await expect(runTest('arg1', 'arg2')).resolves;
+	await expect(runTest(['arg1', 'arg2'])).resolves;
 
-	expect(execa).toHaveBeenCalledWith(
-		'react-scripts',
-		['test', '--color', 'arg1', 'arg2'],
-		expect.objectContaining({
-			env: expect.objectContaining({
-				SKIP_PREFLIGHT_CHECK: true,
-			}),
-		})
-	);
+	expect(execa).toHaveBeenCalledWith('react-scripts', ['test', '--color', 'arg1', 'arg2'], expect.anything());
 });
