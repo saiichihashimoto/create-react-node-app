@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import fs from 'fs';
 import path from 'path';
 import { homedir } from 'os';
@@ -459,7 +458,7 @@ describe('ngrok', () => {
 	it('can be enabled', async () => {
 		await start({ ngrok: true, web: true });
 
-		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000, host_header: 'localhost' }));
+		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000, host_header: 'localhost' })); // eslint-disable-line camelcase
 	});
 
 	it('can\'t be enabled if web is disabled', async () => {
@@ -472,7 +471,7 @@ describe('ngrok', () => {
 		await start({ ngrok: true, web: true });
 
 		expect(ngrok.connect)
-			.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: false }));
+			.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: false })); // eslint-disable-line camelcase
 	});
 
 	it('sets bind_tls=true if HTTPS=true', async () => {
@@ -480,7 +479,7 @@ describe('ngrok', () => {
 
 		await start({ ngrok: true, web: true });
 
-		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ bind_tls: true }));
+		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ bind_tls: true })); // eslint-disable-line camelcase
 	});
 
 	describe('foreman', () => {

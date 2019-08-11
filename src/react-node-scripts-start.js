@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import 'universal-dotenv';
 import path from 'path';
 import { existsSync } from 'fs';
@@ -7,10 +6,9 @@ import { homedir } from 'os';
 import Listr from 'listr';
 import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
 import execa from 'execa';
-import program from 'commander';
 import { connect as connectNgrok } from 'ngrok';
 
-async function start({
+export default async function start({
 	web = true,
 	node = true,
 	mongod,
@@ -77,8 +75,8 @@ async function start({
 
 	const NGROK_URL = ngrok
 		? await connectNgrok({
-			bind_tls:    HTTPS === 'true',
-			host_header: 'localhost',
+			bind_tls:    HTTPS === 'true', // eslint-disable-line camelcase
+			host_header: 'localhost', // eslint-disable-line camelcase
 			port:        PORT,
 		})
 		: undefined;
@@ -140,32 +138,3 @@ async function start({
 		}
 	);
 }
-
-/* istanbul ignore next line */
-if (require.main === module) {
-	program
-		.option('--mongod')
-		.option('--redis')
-		.option('--ngrok')
-		.option('--no-web')
-		.option('--no-node')
-		.parse(process.argv);
-
-	start(program)
-		.catch((err) => { // eslint-disable-line promise/prefer-await-to-callbacks
-			const { errors = [] } = err;
-
-			/* istanbul ignore next line */
-			errors
-				.filter(({ stdout }) => stdout)
-				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-			/* istanbul ignore next line */
-			errors
-				.filter(({ stderr }) => stderr)
-				.forEach(({ stderr }) => console.error(stderr)); // eslint-disable-line no-console
-
-			process.exit(err.code || (errors.find(({ code }) => code) || {}).code || 1); // eslint-disable-line unicorn/no-process-exit
-		});
-}
-
-export default start;
