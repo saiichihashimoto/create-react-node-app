@@ -1,9 +1,13 @@
 import openBrowser from 'react-dev-utils/openBrowser'; // eslint-disable-line import/no-extraneous-dependencies
 
 function openNgrok() {
-	process.env.BROWSER = process.env.REAL_BROWSER || /* istanbul ignore next */ '';
+	if (process.env.PREVIOUS_BROWSER) {
+		process.env.BROWSER = process.env.PREVIOUS_BROWSER;
+	} else {
+		delete process.env.BROWSER;
+	}
 
-	return openBrowser(process.env.NGROK_URL);
+	return openBrowser(process.env.URL_TO_OPEN);
 }
 
 /* istanbul ignore next line */

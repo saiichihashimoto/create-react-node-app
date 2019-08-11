@@ -4,42 +4,31 @@ import runTest from './react-node-scripts-test';
 
 jest.mock('execa');
 
-describe('react-node-scripts test', () => {
-	beforeEach(() => {
-		execa.mockImplementation(() => Promise.resolve());
-	});
+beforeEach(() => {
+	execa.mockImplementation(() => Promise.resolve());
+});
 
-	afterEach(() => {
-		jest.resetAllMocks();
-	});
+afterEach(() => {
+	jest.resetAllMocks();
+});
 
-	describe('react-scripts test', () => {
-		it('executes', async () => {
-			await expect(runTest()).resolves;
+it('executes react-scripts test', async () => {
+	await expect(runTest()).resolves;
 
-			expect(execa).toHaveBeenCalledWith(
-				'react-scripts',
-				['test', '--color'],
-				expect.objectContaining({
-					env: expect.objectContaining({
-						SKIP_PREFLIGHT_CHECK: true,
-					}),
-				})
-			);
-		});
+	expect(execa).toHaveBeenCalledWith(
+		'react-scripts',
+		['test', '--color'],
+		expect.objectContaining({
+			env: expect.objectContaining({
+				SKIP_PREFLIGHT_CHECK: true,
+			}),
+			stdio: 'inherit',
+		})
+	);
+});
 
-		it('consumes arguments', async () => {
-			await expect(runTest('arg1', 'arg2')).resolves;
+it('consumes arguments', async () => {
+	await expect(runTest(['arg1', 'arg2'])).resolves;
 
-			expect(execa).toHaveBeenCalledWith(
-				'react-scripts',
-				['test', '--color', 'arg1', 'arg2'],
-				expect.objectContaining({
-					env: expect.objectContaining({
-						SKIP_PREFLIGHT_CHECK: true,
-					}),
-				})
-			);
-		});
-	});
+	expect(execa).toHaveBeenCalledWith('react-scripts', ['test', '--color', 'arg1', 'arg2'], expect.anything());
 });

@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import 'universal-dotenv';
 import path from 'path';
 import { existsSync } from 'fs';
@@ -7,10 +6,9 @@ import { homedir } from 'os';
 import Listr from 'listr';
 import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
 import execa from 'execa';
-import program from 'commander';
 import { connect as connectNgrok } from 'ngrok';
 
-async function start({
+export default async function start({
 	web = true,
 	node = true,
 	mongod,
@@ -20,12 +18,11 @@ async function start({
 	const {
 		env: {
 			PORT = 3000,
+			NODE_PORT = 4000,
 			MONGOD_PORT = 27017,
 			REDIS_PORT = 6379,
-			BROWSER,
-			HTTPS,
+			BROWSER: PREVIOUS_BROWSER,
 			NODE_ENV,
-			PUBLIC_URL,
 			...env
 		},
 	} = process;
@@ -58,6 +55,7 @@ async function start({
 	if (process.stdout.isTTY) {
 		clearConsole();
 	}
+	const ngrok = ngrokArg && web;
 
 	/*
 	 * https://github.com/strongloop/node-foreman/blob/master/lib/colors.js#L7
@@ -73,15 +71,15 @@ async function start({
 		redis, // red
 	});
 
-	const ngrok = ngrokArg && web;
+	const formationTrimmed = formation
+		.slice(0, formation.map(([, val]) => val).lastIndexOf(true) + 1);
 
-	const NGROK_URL = ngrok
-		? await connectNgrok({
-			bind_tls:    HTTPS === 'true',
-			host_header: 'localhost',
-			port:        PORT,
-		})
-		: undefined;
+	const ports = {
+		web:    PORT,
+		node:   NODE_PORT,
+		mongod: MONGOD_PORT,
+		redis:  REDIS_PORT,
+	};
 
 	return execa(
 		'nf',
@@ -89,8 +87,11 @@ async function start({
 			'start',
 			'--procfile',
 			path.resolve(__dirname, 'Procfile'),
-			formation
-				.slice(0, formation.map(([, val]) => val).lastIndexOf(true) + 1)
+			'-x',
+			formationTrimmed
+				.map(([key]) => ports[key] || 0)
+				.join(','),
+			formationTrimmed
 				.map(([key, val], index) => (val ? `${key}=1` : `foo${index + 1}=0`))
 				.join(','),
 		],
@@ -98,30 +99,27 @@ async function start({
 			env: {
 				...env,
 				NODE_ENV: 'development',
-				BROWSER,
-				HTTPS,
-				PORT,
+				BROWSER:  path.resolve(__dirname, 'open-url.js'),
+				PREVIOUS_BROWSER,
+				HTTPS:    false,
 
 				...web && {
-					WEB_PORT_OFFSET:      -100 * formation.findIndex(([key]) => key === 'web'),
+					URL_TO_OPEN:          `http://localhost:${PORT}`,
 					SKIP_PREFLIGHT_CHECK: true,
 				},
 
 				...node && {
-					NODE_PORT_OFFSET: 1000 - (100 * formation.findIndex(([key]) => key === 'node')),
-					src:              existsSync('./src/index.node.js') ? 'src/index.node' : 'src',
-					root:             __dirname,
+					src:  existsSync('./src/index.node.js') ? 'src/index.node' : 'src',
+					root: __dirname,
 				},
 
 				...mongod && {
-					MONGOD_PORT,
 					MONGODB_URI: `mongodb://localhost:${MONGOD_PORT}/database`,
 					MONGOHQ_URL: `mongodb://localhost:${MONGOD_PORT}/database`,
 					ORMONGO_URL: `mongodb://localhost:${MONGOD_PORT}/database`,
 				},
 
 				...redis && {
-					REDIS_PORT,
 					OPENREDIS_URL:  `redis://localhost:${REDIS_PORT}`,
 					REDISCLOUD_URL: `redis://localhost:${REDIS_PORT}`,
 					REDISGREEN_URL: `redis://localhost:${REDIS_PORT}`,
@@ -130,42 +128,14 @@ async function start({
 				},
 
 				...ngrok && {
-					NGROK_URL,
-					BROWSER:      path.resolve(__dirname, 'open-ngrok.js'),
-					REAL_BROWSER: BROWSER,
-					HTTPS:        false,
+					URL_TO_OPEN: await connectNgrok({
+						bind_tls:    true, // eslint-disable-line camelcase
+						host_header: 'localhost', // eslint-disable-line camelcase
+						port:        PORT,
+					}),
 				},
 			},
 			stdio: 'inherit',
 		}
 	);
 }
-
-/* istanbul ignore next line */
-if (require.main === module) {
-	program
-		.option('--mongod')
-		.option('--redis')
-		.option('--ngrok')
-		.option('--no-web')
-		.option('--no-node')
-		.parse(process.argv);
-
-	start(program)
-		.catch((err) => { // eslint-disable-line promise/prefer-await-to-callbacks
-			const { errors = [] } = err;
-
-			/* istanbul ignore next line */
-			errors
-				.filter(({ stdout }) => stdout)
-				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-			/* istanbul ignore next line */
-			errors
-				.filter(({ stderr }) => stderr)
-				.forEach(({ stderr }) => console.error(stderr)); // eslint-disable-line no-console
-
-			process.exit(err.code || (errors.find(({ code }) => code) || {}).code || 1); // eslint-disable-line unicorn/no-process-exit
-		});
-}
-
-export default start;

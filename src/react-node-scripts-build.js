@@ -2,65 +2,52 @@ import path from 'path';
 
 import Listr from 'listr';
 import execa from 'execa';
-import program from 'commander';
 
-function build({ web = true, node = true } = {}) {
+export default function build({ web = true, node = true } = {}) {
 	return new Listr(
 		[
 			{
 				title: 'node',
 				skip:  () => !node,
-				async task(outputs) {
-					const output = await execa(
-						'babel',
-						[
-							'src',
+				task:  () => execa(
+					'babel',
+					[
+						'src',
 
-							'--out-dir',
-							'lib',
-							'--config-file',
-							path.resolve(__dirname, 'babel.config.js'),
-							'--copy-files',
-							'--delete-dir-on-start',
-							'--no-babelrc',
-							'--source-maps',
-							'--verbose',
-						],
-						{
-							env: {
-								...process.env,
-								NODE_ENV: 'production',
-							},
-						}
-					);
-
-					outputs.push(output);
-
-					return output;
-				},
+						'--out-dir',
+						'lib',
+						'--config-file',
+						path.resolve(__dirname, 'babel.config.js'),
+						'--copy-files',
+						'--delete-dir-on-start',
+						'--no-babelrc',
+						'--source-maps',
+						'--verbose',
+					],
+					{
+						env: {
+							...process.env,
+							NODE_ENV: 'production',
+						},
+					}
+				),
 			},
 			{
 				title: 'web',
 				skip:  () => !web,
-				async task(outputs) {
-					const output = await execa(
-						'react-scripts',
-						[
-							'build',
-							'--color',
-						],
-						{
-							env: {
-								...process.env,
-								SKIP_PREFLIGHT_CHECK: true,
-							},
-						}
-					);
-
-					outputs.push(output);
-
-					return output;
-				},
+				task:  () => execa(
+					'react-scripts',
+					[
+						'build',
+						'--color',
+					],
+					{
+						env: {
+							...process.env,
+							SKIP_PREFLIGHT_CHECK: true,
+						},
+					}
+				),
 			},
 		],
 		{
@@ -71,36 +58,3 @@ function build({ web = true, node = true } = {}) {
 	)
 		.run([]);
 }
-
-/* istanbul ignore next line */
-if (require.main === module) {
-	program
-		.option('--no-web')
-		.option('--no-node')
-		.parse(process.argv);
-
-	build(program)
-		.then((outputs) => { // eslint-disable-line promise/prefer-await-to-then
-			outputs
-				.filter(({ stdout }) => stdout)
-				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-
-			return outputs;
-		})
-		.catch((err) => { // eslint-disable-line promise/prefer-await-to-callbacks
-			const { errors = [] } = err;
-
-			/* istanbul ignore next line */
-			errors
-				.filter(({ stdout }) => stdout)
-				.forEach(({ stdout }) => console.log(stdout)); // eslint-disable-line no-console
-			/* istanbul ignore next line */
-			errors
-				.filter(({ stderr }) => stderr)
-				.forEach(({ stderr }) => console.error(stderr)); // eslint-disable-line no-console
-
-			process.exit(err.code || (errors.find(({ code }) => code) || {}).code || 1);
-		});
-}
-
-export default build;

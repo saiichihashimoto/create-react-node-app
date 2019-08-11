@@ -15,6 +15,7 @@
     "not op_mini all"
   ],
   "dependencies": {
+    "express": "^4.17.1",
     "install-local": "1.0.0",
     "react": "^16.8.2",
     "react-dom": "^16.8.2"
