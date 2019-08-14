@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 it('executes react-scripts test', async () => {
-	await expect(runTest()).resolves;
+	await runTest();
 
 	expect(execa).toHaveBeenCalledWith(
 		'react-scripts',
@@ -28,7 +28,7 @@ it('executes react-scripts test', async () => {
 });
 
 it('consumes arguments', async () => {
-	await expect(runTest(['arg1', 'arg2'])).resolves;
+	await runTest(['arg1', 'arg2']);
 
 	expect(execa).toHaveBeenCalledWith('react-scripts', ['test', '--color', 'arg1', 'arg2'], expect.anything());
 });
