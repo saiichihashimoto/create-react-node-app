@@ -74,7 +74,7 @@
     "bunyan": "1.8.12",
     "commander": "3.0.0",
     "cross-env": "5.2.0",
-    "execa": "2.0.3",
+    "execa": "2.0.4",
     "foreman": "3.0.1",
     "forever": "1.0.0",
     "listr": "0.14.3",
