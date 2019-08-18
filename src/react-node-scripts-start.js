@@ -14,7 +14,7 @@ export default async function start({
 	node = true,
 	mongod,
 	redis,
-	ngrok: ngrokArg,
+	ngrok,
 } = {}) {
 	const env = { ...expand(process.env.NODE_ENV), ...process.env };
 
@@ -64,7 +64,6 @@ export default async function start({
 	if (process.stdout.isTTY) {
 		clearConsole();
 	}
-	const ngrok = ngrokArg && web;
 
 	/*
 	 * https://github.com/strongloop/node-foreman/blob/master/lib/colors.js#L7
@@ -113,13 +112,14 @@ export default async function start({
 				HTTPS:    false,
 
 				...web && {
-					URL_TO_OPEN:          `http://localhost:${PORT}`,
+					PUBLIC_URL:           `http://localhost:${PORT}`,
 					SKIP_PREFLIGHT_CHECK: true,
 				},
 
 				...node && {
-					src:  existsSync('./src/index.node.js') ? 'src/index.node' : 'src',
-					root: __dirname,
+					REACT_APP_BACKEND_URL: `http://localhost:${NODE_PORT}`,
+					src:                   existsSync('./src/index.node.js') ? 'src/index.node' : 'src',
+					root:                  __dirname,
 				},
 
 				...mongod && {
@@ -136,13 +136,18 @@ export default async function start({
 					REDIS_URL:      `redis://localhost:${REDIS_PORT}`,
 				},
 
-				...ngrok && {
-					URL_TO_OPEN: await connectNgrok({
-						bind_tls:    true, // eslint-disable-line camelcase
-						host_header: 'localhost', // eslint-disable-line camelcase
-						port:        PORT,
-					}),
-				},
+				...ngrok && Object.fromEntries(await Promise.all(
+					[
+						web && ['PUBLIC_URL', PORT],
+						node && ['REACT_APP_BACKEND_URL', NODE_PORT],
+					]
+						.filter(Boolean)
+						.map(async ([key, addr]) => [key, await connectNgrok({
+							bind_tls:    true, // eslint-disable-line camelcase
+							host_header: 'localhost', // eslint-disable-line camelcase
+							addr,
+						})])
+				)),
 			},
 			stdio: 'inherit',
 		}

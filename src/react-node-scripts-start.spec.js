@@ -26,10 +26,11 @@ afterEach(() => {
 	process.env.NODE_ENV = NODE_ENV_BEFORE;
 	process.stdout.isTTY = beforeIsTTY;
 
+	delete process.env.BROWSER;
 	delete process.env.MONGOD_PORT;
+	delete process.env.NODE_PORT;
 	delete process.env.PORT;
 	delete process.env.REDIS_PORT;
-	delete process.env.BROWSER;
 
 	files = {};
 
@@ -143,7 +144,7 @@ describe('foreman', () => {
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
 				expect.arrayContaining(['-x', expect.stringMatching(/^\d+,\d+,3000/u)]),
-				expect.objectContaining({ env: expect.objectContaining({ URL_TO_OPEN: 'http://localhost:3000' }) })
+				expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: 'http://localhost:3000' }) })
 			);
 		});
 
@@ -155,7 +156,7 @@ describe('foreman', () => {
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
 				expect.arrayContaining(['-x', expect.stringMatching(/^\d+,\d+,4000/u)]),
-				expect.objectContaining({ env: expect.objectContaining({ URL_TO_OPEN: 'http://localhost:4000' }) })
+				expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: 'http://localhost:4000' }) })
 			);
 		});
 
@@ -194,7 +195,11 @@ describe('foreman', () => {
 		it('uses port 4000', async () => {
 			await start({ node: true });
 
-			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining(['-x', expect.stringMatching(/^4000/u)]), expect.anything());
+			expect(execa).toHaveBeenCalledWith(
+				'nf',
+				expect.arrayContaining(['-x', expect.stringMatching(/^4000/u)]),
+				expect.objectContaining({ env: expect.objectContaining({ REACT_APP_BACKEND_URL: 'http://localhost:4000' }) })
+			);
 		});
 
 		it('uses defined NODE_PORT', async () => {
@@ -202,7 +207,11 @@ describe('foreman', () => {
 
 			await start({ web: true });
 
-			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining(['-x', expect.stringMatching(/^5000/u)]), expect.anything());
+			expect(execa).toHaveBeenCalledWith(
+				'nf',
+				expect.arrayContaining(['-x', expect.stringMatching(/^5000/u)]),
+				expect.objectContaining({ env: expect.objectContaining({ REACT_APP_BACKEND_URL: 'http://localhost:5000' }) })
+			);
 		});
 
 		it('sets NODE_ENV=development', async () => {
@@ -428,40 +437,57 @@ describe('foreman', () => {
 });
 
 describe('ngrok', () => {
+	const addrToUrl = {
+		3000: 'http://web-ngrok.ngrok.io',
+		4000: 'http://node-ngrok.ngrok.io',
+	};
+
 	beforeEach(() => {
-		ngrok.connect.mockImplementation(() => Promise.resolve('https://foo-bar.com'));
+		ngrok.connect.mockImplementation(({ addr }) => addrToUrl[addr]);
 	});
 
 	it('is disabled by default', async () => {
-		await start({ web: false });
+		await start();
 
 		expect(ngrok.connect).not.toHaveBeenCalled();
 	});
 
-	it('can be enabled', async () => {
+	it('can be enabled with web', async () => {
 		await start({ ngrok: true, web: true });
 
-		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ port: 3000, host_header: 'localhost' })); // eslint-disable-line camelcase
+		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ addr: 3000, host_header: 'localhost' })); // eslint-disable-line camelcase
 	});
 
-	it('can\'t be enabled if web is disabled', async () => {
-		await start({ ngrok: true, web: false });
+	it('can be enabled with node', async () => {
+		await start({ ngrok: true, node: true });
+
+		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ addr: 4000, host_header: 'localhost' })); // eslint-disable-line camelcase
+	});
+
+	it('can\'t be enabled if web and node are disabled', async () => {
+		await start({ ngrok: true, web: false, node: false });
 
 		expect(ngrok.connect).not.toHaveBeenCalled();
 	});
 
-	it('sets bind_tls=false', async () => {
-		await start({ ngrok: true, web: true });
+	it('sets bind_tls=true', async () => {
+		await start({ ngrok: true, web: true, node: true });
 
 		expect(ngrok.connect)
 			.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: true })); // eslint-disable-line camelcase
+		expect(ngrok.connect)
+			.not.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: false })); // eslint-disable-line camelcase
 	});
 
-	describe('foreman', () => {
-		it('sets URL_TO_OPEN', async () => {
-			await start({ ngrok: true, web: true });
+	it('sets PUBLIC_URL with web', async () => {
+		await start({ ngrok: true, web: true });
 
-			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ URL_TO_OPEN: 'https://foo-bar.com' }) }));
-		});
+		expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: addrToUrl[3000] }) }));
+	});
+
+	it('sets REACT_APP_BACKEND_URL with node', async () => {
+		await start({ ngrok: true, node: true });
+
+		expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REACT_APP_BACKEND_URL: addrToUrl[4000] }) }));
 	});
 });

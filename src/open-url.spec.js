@@ -5,7 +5,7 @@ import openUrl from './open-url';
 jest.mock('react-dev-utils/openBrowser');
 
 beforeEach(() => {
-	process.env.URL_TO_OPEN = 'https://google.com';
+	process.env.PUBLIC_URL = 'https://google.com';
 
 	openBrowser.mockImplementation(() => 'some return value');
 });
@@ -13,7 +13,7 @@ beforeEach(() => {
 afterEach(() => {
 	delete process.env.BROWSER;
 	delete process.env.PREVIOUS_BROWSER;
-	delete process.env.URL_TO_OPEN;
+	delete process.env.PUBLIC_URL;
 
 	jest.resetAllMocks();
 });
