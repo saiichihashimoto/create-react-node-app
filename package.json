@@ -70,7 +70,7 @@
     "babel-plugin-file-loader": "1.1.1",
     "babel-plugin-transform-dynamic-import": "2.1.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
-    "babel-plugin-universal-dotenv": "1.1.4",
+    "babel-plugin-universal-dotenv": "1.1.5",
     "bunyan": "1.8.12",
     "commander": "3.0.0",
     "cross-env": "5.2.0",
