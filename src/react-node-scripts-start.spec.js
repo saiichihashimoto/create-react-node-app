@@ -19,9 +19,7 @@ let files = {};
 
 beforeEach(() => {
 	execa.mockImplementation(() => Promise.resolve());
-	fs.existsSync.mockImplementation(
-		(filePath) => Object.prototype.hasOwnProperty.call(files, filePath)
-	);
+	fs.existsSync.mockImplementation((filePath) => filePath in files);
 });
 
 afterEach(() => {

@@ -7,6 +7,7 @@ import Listr from 'listr';
 import clearConsole from 'react-dev-utils/clearConsole'; // eslint-disable-line import/no-extraneous-dependencies
 import execa from 'execa';
 import { connect as connectNgrok } from 'ngrok';
+import { expand } from 'babel-plugin-universal-dotenv';
 
 export default async function start({
 	web = true,
@@ -15,21 +16,29 @@ export default async function start({
 	redis,
 	ngrok: ngrokArg,
 } = {}) {
-	const {
-		env: {
-			PORT = 3000,
-			NODE_PORT = 4000,
-			MONGOD_PORT = 27017,
-			REDIS_PORT = 6379,
-			BROWSER: PREVIOUS_BROWSER,
-			NODE_ENV,
-			...env
-		},
-	} = process;
+	const env = { ...expand(process.env.NODE_ENV), ...process.env };
 
-	if (NODE_ENV === 'production') {
-		return execa('forever', [existsSync('./lib/index.node.js') ? 'lib/index.node.js' : 'lib/index.js'], { stdio: 'inherit' });
+	if (process.env.NODE_ENV === 'production') {
+		return execa(
+			'forever',
+			[existsSync('./lib/index.node.js') ? 'lib/index.node.js' : 'lib/index.js'],
+			{
+				env: {
+					...env,
+					NODE_ENV: 'production',
+				},
+				stdio: 'inherit',
+			}
+		);
 	}
+
+	const {
+		PORT = 3000,
+		NODE_PORT = 4000,
+		MONGOD_PORT = 27017,
+		REDIS_PORT = 6379,
+		BROWSER: PREVIOUS_BROWSER,
+	} = env;
 
 	await new Listr(
 		[
@@ -45,7 +54,7 @@ export default async function start({
 			},
 		],
 		{
-			renderer:    NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
+			renderer:    process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
 			exitOnError: false,
 			concurrent:  true,
 		}
