@@ -7,7 +7,7 @@ function openNgrok() {
 		delete process.env.BROWSER;
 	}
 
-	return openBrowser(process.env.URL_TO_OPEN);
+	return openBrowser(process.env.PUBLIC_URL);
 }
 
 /* istanbul ignore next line */

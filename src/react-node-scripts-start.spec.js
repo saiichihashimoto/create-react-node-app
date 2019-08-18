@@ -143,7 +143,7 @@ describe('foreman', () => {
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
 				expect.arrayContaining(['-x', expect.stringMatching(/^\d+,\d+,3000/u)]),
-				expect.objectContaining({ env: expect.objectContaining({ URL_TO_OPEN: 'http://localhost:3000' }) })
+				expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: 'http://localhost:3000' }) })
 			);
 		});
 
@@ -155,7 +155,7 @@ describe('foreman', () => {
 			expect(execa).toHaveBeenCalledWith(
 				'nf',
 				expect.arrayContaining(['-x', expect.stringMatching(/^\d+,\d+,4000/u)]),
-				expect.objectContaining({ env: expect.objectContaining({ URL_TO_OPEN: 'http://localhost:4000' }) })
+				expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: 'http://localhost:4000' }) })
 			);
 		});
 
@@ -458,10 +458,10 @@ describe('ngrok', () => {
 	});
 
 	describe('foreman', () => {
-		it('sets URL_TO_OPEN', async () => {
+		it('sets PUBLIC_URL', async () => {
 			await start({ ngrok: true, web: true });
 
-			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ URL_TO_OPEN: 'https://foo-bar.com' }) }));
+			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: 'https://foo-bar.com' }) }));
 		});
 	});
 });

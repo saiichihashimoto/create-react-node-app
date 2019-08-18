@@ -113,7 +113,7 @@ export default async function start({
 				HTTPS:    false,
 
 				...web && {
-					URL_TO_OPEN:          `http://localhost:${PORT}`,
+					PUBLIC_URL:           `http://localhost:${PORT}`,
 					SKIP_PREFLIGHT_CHECK: true,
 				},
 
@@ -137,7 +137,7 @@ export default async function start({
 				},
 
 				...ngrok && {
-					URL_TO_OPEN: await connectNgrok({
+					PUBLIC_URL: await connectNgrok({
 						bind_tls:    true, // eslint-disable-line camelcase
 						host_header: 'localhost', // eslint-disable-line camelcase
 						port:        PORT,
