@@ -20,9 +20,9 @@ let files = {};
 beforeEach(() => {
 	execa.mockImplementation(() => Promise.resolve());
 	fs.existsSync.mockImplementation((filePath) => filePath in files);
-});
 
-afterEach(() => {
+	files = {};
+
 	process.env.NODE_ENV = NODE_ENV_BEFORE;
 	process.stdout.isTTY = beforeIsTTY;
 
@@ -31,9 +31,9 @@ afterEach(() => {
 	delete process.env.NODE_PORT;
 	delete process.env.PORT;
 	delete process.env.REDIS_PORT;
+});
 
-	files = {};
-
+afterEach(() => {
 	jest.resetAllMocks();
 });
 
@@ -167,6 +167,8 @@ describe('foreman', () => {
 		});
 
 		it('sets NODE_ENV=development', async () => {
+			delete process.env.NODE_ENV;
+
 			await start({ web: true });
 
 			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_ENV: 'development' }) }));
@@ -215,6 +217,8 @@ describe('foreman', () => {
 		});
 
 		it('sets NODE_ENV=development', async () => {
+			delete process.env.NODE_ENV;
+
 			await start({ node: true });
 
 			expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ NODE_ENV: 'development' }) }));

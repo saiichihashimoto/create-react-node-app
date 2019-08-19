@@ -16,9 +16,10 @@ export default async function start({
 	redis,
 	ngrok,
 } = {}) {
-	const env = { ...expand(process.env.NODE_ENV), ...process.env };
+	const { NODE_ENV = 'development' } = process.env;
+	const env = { ...expand(NODE_ENV), ...process.env };
 
-	if (process.env.NODE_ENV === 'production') {
+	if (NODE_ENV === 'production') {
 		return execa(
 			'forever',
 			[existsSync('./lib/index.node.js') ? 'lib/index.node.js' : 'lib/index.js'],
@@ -54,7 +55,7 @@ export default async function start({
 			},
 		],
 		{
-			renderer:    process.env.NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
+			renderer:    NODE_ENV === 'test' ? 'silent' : /* istanbul ignore next */ 'default',
 			exitOnError: false,
 			concurrent:  true,
 		}
