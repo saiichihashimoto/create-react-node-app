@@ -437,13 +437,13 @@ describe('foreman', () => {
 });
 
 describe('ngrok', () => {
-	const addrToUrl = {
-		3000: 'http://web-ngrok.ngrok.io',
-		4000: 'http://node-ngrok.ngrok.io',
+	const nameToUrl = {
+		web:  'http://web-ngrok.ngrok.io',
+		node: 'http://node-ngrok.ngrok.io',
 	};
 
 	beforeEach(() => {
-		ngrok.connect.mockImplementation(({ addr }) => addrToUrl[addr]);
+		ngrok.connect.mockImplementation(({ name }) => nameToUrl[name]);
 	});
 
 	it('is disabled by default', async () => {
@@ -455,13 +455,13 @@ describe('ngrok', () => {
 	it('can be enabled with web', async () => {
 		await start({ ngrok: true, web: true });
 
-		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ addr: 3000, host_header: 'localhost' })); // eslint-disable-line camelcase
+		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ name: 'web', addr: 3000 }));
 	});
 
 	it('can be enabled with node', async () => {
 		await start({ ngrok: true, node: true });
 
-		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ addr: 4000, host_header: 'localhost' })); // eslint-disable-line camelcase
+		expect(ngrok.connect).toHaveBeenCalledWith(expect.objectContaining({ name: 'node', addr: 4000 }));
 	});
 
 	it('can\'t be enabled if web and node are disabled', async () => {
@@ -470,24 +470,28 @@ describe('ngrok', () => {
 		expect(ngrok.connect).not.toHaveBeenCalled();
 	});
 
-	it('sets bind_tls=true', async () => {
+	it('sets common ngrok values', async () => {
 		await start({ ngrok: true, web: true, node: true });
 
 		expect(ngrok.connect)
-			.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: true })); // eslint-disable-line camelcase
+			.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: true, host_header: 'localhost' })); // eslint-disable-line camelcase
+
+		// Make sure opposite situations don't exist
 		expect(ngrok.connect)
-			.not.toHaveBeenCalledWith(expect.objectContaining({ bind_tls: false })); // eslint-disable-line camelcase
+			.not.toHaveBeenCalledWith(expect.not.objectContaining({ bind_tls: true })); // eslint-disable-line camelcase
+		expect(ngrok.connect)
+			.not.toHaveBeenCalledWith(expect.not.objectContaining({ host_header: 'localhost' })); // eslint-disable-line camelcase
 	});
 
 	it('sets PUBLIC_URL with web', async () => {
 		await start({ ngrok: true, web: true });
 
-		expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: addrToUrl[3000] }) }));
+		expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ PUBLIC_URL: nameToUrl.web }) }));
 	});
 
 	it('sets REACT_APP_BACKEND_URL with node', async () => {
 		await start({ ngrok: true, node: true });
 
-		expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REACT_APP_BACKEND_URL: addrToUrl[4000] }) }));
+		expect(execa).toHaveBeenCalledWith('nf', expect.anything(), expect.objectContaining({ env: expect.objectContaining({ REACT_APP_BACKEND_URL: nameToUrl.node }) }));
 	});
 });
