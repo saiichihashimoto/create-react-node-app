@@ -138,14 +138,20 @@ export default async function start({
 
 				...ngrok && Object.fromEntries(await Promise.all(
 					[
-						web && ['PUBLIC_URL', PORT],
-						node && ['REACT_APP_BACKEND_URL', NODE_PORT],
+						web && ['PUBLIC_URL', {
+							name: 'web',
+							addr: PORT,
+						}],
+						node && ['REACT_APP_BACKEND_URL', {
+							name: 'node',
+							addr: NODE_PORT,
+						}],
 					]
 						.filter(Boolean)
-						.map(async ([key, addr]) => [key, await connectNgrok({
+						.map(async ([key, opts]) => [key, await connectNgrok({
 							bind_tls:    true, // eslint-disable-line camelcase
 							host_header: 'localhost', // eslint-disable-line camelcase
-							addr,
+							...opts,
 						})])
 				)),
 			},
