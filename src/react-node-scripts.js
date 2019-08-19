@@ -29,6 +29,8 @@ program
 	.option('--ngrok')
 	.option('--no-web')
 	.option('--no-node')
+	.option('--web [number]')
+	.option('--node [number]')
 	.action((...args) => { action = () => reactNodeScriptsStart(...args); });
 
 program

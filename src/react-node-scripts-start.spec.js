@@ -138,6 +138,12 @@ describe('foreman', () => {
 			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,web=1/u)]), expect.anything());
 		});
 
+		it('can run multiple jobs', async () => {
+			await start({ web: 2 });
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^\w+=\d,\w+=\d,web=2/u)]), expect.anything());
+		});
+
 		it('uses port 3000', async () => {
 			await start({ web: true });
 
@@ -192,6 +198,12 @@ describe('foreman', () => {
 			await start({ node: true });
 
 			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^node=1/u)]), expect.anything());
+		});
+
+		it('can run multiple jobs', async () => {
+			await start({ node: 2 });
+
+			expect(execa).toHaveBeenCalledWith('nf', expect.arrayContaining([expect.stringMatching(/^node=2/u)]), expect.anything());
 		});
 
 		it('uses port 4000', async () => {
