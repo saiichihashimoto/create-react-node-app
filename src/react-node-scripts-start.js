@@ -12,9 +12,9 @@ import { expand } from 'babel-plugin-universal-dotenv';
 export default async function start({
 	web = true,
 	node = true,
-	mongod,
-	redis,
-	ngrok,
+	mongod = false,
+	redis = false,
+	ngrok = false,
 } = {}) {
 	const { NODE_ENV = 'development' } = process.env;
 	const env = { ...expand(NODE_ENV), ...process.env };
@@ -71,17 +71,18 @@ export default async function start({
 	 * The order dictates the color
 	 */
 
-	const formation = Object.entries({
-		node, // magenta
-		foo2: false, // blue
-		web, // cyan
-		mongod, // green
-		foo5: false, // yellow
-		redis, // red
-	});
+	const formation = [
+		['node', node && Number(node)], // magenta
+		['foo2', false], // blue
+		['web', web && Number(web)], // cyan
+		['mongod', mongod && Number(mongod)], // green
+		['foo5', false], // yellow
+		['redis', redis && Number(redis)], // red
+	];
 
-	const formationTrimmed = formation
-		.slice(0, formation.map(([, val]) => val).lastIndexOf(true) + 1);
+	while (formation.length && !formation[formation.length - 1][1]) {
+		formation.pop();
+	}
 
 	const ports = {
 		web:    PORT,
@@ -97,11 +98,11 @@ export default async function start({
 			'--procfile',
 			path.resolve(__dirname, 'Procfile'),
 			'-x',
-			formationTrimmed
+			formation
 				.map(([key]) => ports[key] || 0)
 				.join(','),
-			formationTrimmed
-				.map(([key, val], index) => (val ? `${key}=1` : `foo${index + 1}=0`))
+			formation
+				.map(([key, val], index) => (val ? `${key}=${val}` : `foo${index + 1}=0`))
 				.join(','),
 		],
 		{
