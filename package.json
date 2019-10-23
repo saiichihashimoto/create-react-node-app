@@ -94,7 +94,7 @@
     "jest": "24.1.0",
     "lint-my-app": "3.7.15",
     "react": "16.11.0",
-    "react-dom": "16.9.0",
+    "react-dom": "16.11.0",
     "stylelint-config-saiichihashimoto": "2.0.9"
   },
   "peerDependencies": {
