@@ -72,7 +72,7 @@
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "babel-plugin-universal-dotenv": "1.2.0",
     "bunyan": "1.8.12",
-    "commander": "3.0.1",
+    "commander": "3.0.2",
     "cross-env": "6.0.3",
     "execa": "3.2.0",
     "foreman": "3.0.1",
