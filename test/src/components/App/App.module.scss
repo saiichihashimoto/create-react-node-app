@@ -1,5 +1,7 @@
+@import './Other.module.scss';
+
 .app {
-	text-align: center;
+	composes: other from './Other.module.scss';
 }
 
 .appLogo {
@@ -20,7 +22,7 @@
 }
 
 .appLink {
-	color: #61dafb;
+	color: $link-color;
 }
 
 @keyframes App-logo-spin {
