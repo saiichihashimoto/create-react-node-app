@@ -83,7 +83,7 @@
     "node-sass": "4.13.0",
     "nodemon": "1.19.4",
     "react-scripts": "3.0.1",
-    "redis-prebuilt": "1.0.35",
+    "redis-prebuilt": "1.0.36",
     "universal-dotenv": "3.0.3",
     "update-notifier": "3.0.1"
   },
