@@ -92,7 +92,7 @@
     "eslint-config-saiichihashimoto": "2.0.60",
     "husky": "3.1.0",
     "jest": "24.1.0",
-    "lint-my-app": "3.7.33",
+    "lint-my-app": "3.7.34",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "stylelint-config-saiichihashimoto": "2.0.14"
