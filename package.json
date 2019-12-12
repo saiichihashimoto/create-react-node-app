@@ -79,7 +79,7 @@
     "forever": "1.0.0",
     "listr": "0.14.3",
     "mongodb-prebuilt": "6.5.0",
-    "ngrok": "3.2.5",
+    "ngrok": "3.2.7",
     "node-sass": "4.13.0",
     "nodemon": "2.0.2",
     "react-scripts": "3.0.1",
