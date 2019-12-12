@@ -85,7 +85,7 @@
     "react-scripts": "3.0.1",
     "redis-prebuilt": "1.0.39",
     "universal-dotenv": "3.0.3",
-    "update-notifier": "3.0.1"
+    "update-notifier": "4.0.0"
   },
   "devDependencies": {
     "cz-conventional-changelog": "3.0.2",
