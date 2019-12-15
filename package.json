@@ -79,20 +79,20 @@
     "forever": "1.0.0",
     "listr": "0.14.3",
     "mongodb-prebuilt": "6.5.0",
-    "ngrok": "3.2.5",
+    "ngrok": "3.2.7",
     "node-sass": "4.13.0",
-    "nodemon": "2.0.1",
+    "nodemon": "2.0.2",
     "react-scripts": "3.0.1",
-    "redis-prebuilt": "1.0.39",
-    "universal-dotenv": "3.0.3",
-    "update-notifier": "3.0.1"
+    "redis-prebuilt": "1.0.41",
+    "universal-dotenv": "3.0.4",
+    "update-notifier": "4.0.0"
   },
   "devDependencies": {
     "cz-conventional-changelog": "3.0.2",
     "eslint-config-saiichihashimoto": "2.0.62",
     "husky": "3.1.0",
     "jest": "24.1.0",
-    "lint-my-app": "3.7.34",
+    "lint-my-app": "3.7.37",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "stylelint-config-saiichihashimoto": "2.0.14"
