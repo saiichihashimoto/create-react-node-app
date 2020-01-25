@@ -73,7 +73,7 @@
     "babel-plugin-universal-dotenv": "1.2.1",
     "bunyan": "1.8.12",
     "commander": "4.0.1",
-    "cross-env": "6.0.3",
+    "cross-env": "7.0.0",
     "execa": "4.0.0",
     "foreman": "3.0.1",
     "forever": "1.0.0",
